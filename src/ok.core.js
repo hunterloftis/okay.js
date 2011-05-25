@@ -5,7 +5,7 @@
   
   // Create namespace
   
-  var ok = window.ok = {};
+  var ok = window.ok = window.ok || {};
   
   // Tracking
   
@@ -167,8 +167,23 @@
     return dependent;
   }
   
-  function bind() {
-  
-  }
+  ok.bind = function(viewModel, namespace) {
+    // Find all elements with a data-bind attribute
+    var boundNodes = ok.dom.nodesWithAttr('data-bind');
+    
+    _(boundNodes).each(function(node) {
+      // extract the attribute as a string
+      var bindingString = ok.dom.attr(node, 'data-bind');
+      
+      // convert the attribute to a JSON object
+      bindingString = 'var bindingObject = {' + bindingString + '}';
+      eval(bindingString);
+      console.dir(bindingObject);
+      
+      _.each(bindingObject, function(value, binding) {
+        console.log("Binding on " + binding);
+      });
+    });
+  };
   
 })();
