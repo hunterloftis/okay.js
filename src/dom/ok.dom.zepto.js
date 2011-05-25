@@ -1,0 +1,5 @@
+(function($) {
+
+  ok.dom = {};
+
+})(zepto);
