@@ -10,7 +10,8 @@
   // Private members
   
   var _tracking, _tracked;
-  var _allBindings = [];
+  var _allBindings = {};    // Bindings by namespace dictionary
+  var _dataAttr = 'data-bind';
   
   // Begin recording subscribable requests (dependencies)
   
@@ -162,29 +163,40 @@
   // Binding to DOM nodes
   
   ok.bind = function(viewModel, namespace) {
-    var boundNodes = ok.dom.nodesWithAttr('data-bind');   // Find all elements with a data-bind attribute
+    namespace = namespace || '';
+    var dataAttr = _dataAttr + (namespace.length > 0 ? '-' + namespace : '');
+    var boundNodes = ok.dom.nodesWithAttr(dataAttr);   // Find all elements with a data-bind attribute
     
     _(boundNodes).each(function(node) {
-      var bindingString = ok.dom.attr(node, 'data-bind');   // extract the attribute as a string
+      
+      var bindingString = ok.dom.attr(node, dataAttr);   // extract the attribute as a string
       
       bindingString = 'var bindingObject = {' + bindingString + '}';   // convert the attribute to an object
       with(viewModel) {
         eval(bindingString);
       }
       
+      var allBindings = _allBindings[namespace] = [];
       _.each(bindingObject, function(subscribable, type) {        // register subscribables for each binding
-        _allBindings.push(ok.binding[type](node, subscribable));
+        allBindings.push(ok.binding[type](node, subscribable));
       });
     });
   };
   
-  // Unbinding a viewModel
+  // Unbinding a namespace
   
-  ok.unbind = function(viewModel, namespace) {
-    _(_allBindings).each(function(binding) {
-      binding.release();
-    });
-    _allBindings = [];
+  ok.unbind = function(namespace) {
+    namespace = namespace || '';
+    var allBindings = _allBindings[namespace];
+    if(allBindings) {
+      _(allBindings).each(function(binding) {
+        binding.release();
+      });
+      _allBindings[namespace] = [];
+    }
+    else {
+      throw new Error("Nothing is bound to namespace '" + namespace + "'");
+    }
   };
   
 })();

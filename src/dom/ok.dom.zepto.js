@@ -3,7 +3,7 @@
   var dom = ok.dom;
   
   dom.nodesWithAttr = function(attr) {
-    return $('*[data-bind]');
+    return $('*[' + attr + ']');
   };
   
   dom.attr = function(node, attr) {

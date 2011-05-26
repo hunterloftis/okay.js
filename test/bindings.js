@@ -4,8 +4,6 @@ $(document).ready(function() {
   
   test("simple bindings", function() {
     
-    // View Models
-    
     var viewModel = {
       testVisible: ok.base(false)
     };
@@ -29,7 +27,7 @@ $(document).ready(function() {
     strictEqual($('#testVisible').css('display'), 'block', 'base value binding autoupdates');
     strictEqual($('#testHtml').html(), 'visible', 'dependent value binding autoupdates');
     
-    ok.unbind(viewModel);
+    ok.unbind();
     viewModel.testVisible(false);
     
     strictEqual($('#testVisible').css('display'), 'block', 'unbind base view model');
@@ -37,13 +35,44 @@ $(document).ready(function() {
     
   });
   
-  /*
+
   test("simple namespaced bindings", function() {
-    strictEqual(obj.dependentTriple(), 3, 'bind visible to a base value');
-    strictEqual(obj.dependentTriple(), 6, 'bind text to a dependent value');
+    
+    var vm1 = {
+      visible: ok.base(false)
+    };
+    
+    var vm2 = {
+      visible: ok.base(false)
+    }
+    
+    strictEqual($('#namespace1').css('display'), 'block', 'no effect to namespaced nodes before binding');
+    strictEqual($('#namespace2').css('display'), 'block', 'no effect to namespaced nodes before binding');
+    
+    ok.bind(vm1, 'namespace1');
+
+    strictEqual($('#namespace1').css('display'), 'none', 'namespaced nodes can bind to view model');
+    strictEqual($('#namespace2').css('display'), 'block', 'other namespaces are unaffected');
+    
+    ok.bind(vm2, 'namespace2');
+    
+    strictEqual($('#namespace2').css('display'), 'none', 'other namespaces can bind to different view models');
+    
+    vm1.visible(true);
+    
+    strictEqual($('#namespace1').css('display'), 'block', 'namespaced view models update nodes on change');
+    strictEqual($('#namespace2').css('display'), 'none', 'other namespaces are unaffected');
+    
+    ok.unbind('namespace1');
+    vm1.visible(false);
+    vm2.visible(true);
+    
+    strictEqual($('#namespace1').css('display'), 'block', 'namespaces can be unbound');
+    strictEqual($('#namespace2').css('display'), 'block', 'other namespaces are unaffected');
   });
-  
-  test("bindings dependent on collections", function() {
+
+  /*  
+  test("bindings on collections", function() {
     strictEqual(obj.dependentTriple(), 3, 'bind visible to a base value');
     strictEqual(obj.dependentTriple(), 6, 'bind visible to a dependent value');
     strictEqual(obj.dependentTriple(), 6, 'bind text to a base value');
