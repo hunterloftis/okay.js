@@ -13,17 +13,20 @@
   var _allBindings = [];
   
   // Begin recording subscribable requests (dependencies)
+  
   function _startTracking() {
     _tracking = true;
     _tracked = [];
   }
   
   // Record a subscribable request
+  
   function _track(subscribable) {
     _tracked.push(subscribable);
   }
   
   // Stop recording requests and return a list of the unique requests
+  
   function _stopTracking() {
     _tracking = false;
     _tracked = _.uniq(_tracked);
@@ -57,7 +60,6 @@
     }
   };
   
-  // Allow an object to publish changes of its value
   function _makeSubscribable(object) {
     object._subscriptions = [];
     object.subscribe = subscribable.subscribe;
@@ -79,14 +81,10 @@
         }
         return this;
       }
-      
       if (_tracking) _track(base);
-      
       return _currentValue;
     }
-
     _makeSubscribable(base);
-    
     return base;
   }
   
@@ -109,13 +107,9 @@
       }
     }
     
-    collection.pop = adapt('pop');
-    collection.push = adapt('push');
-    collection.reverse = adapt('reverse');
-    collection.shift = adapt('shift');
-    collection.sort = adapt('sort');
-    collection.splice = adapt('splice');
-    collection.unshift = adapt('unshift');
+    _(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift']).each(function(method) {
+      collection[method] = adapt(method);
+    });
     
     return collection;
   }
@@ -129,69 +123,56 @@
       if (_tracking) _track(dependent);
       return _currentValue;
     }
-    
+
     _makeSubscribable(dependent);
     
     function _update() {    
       var boundDependencies = _update._publishers ? _update._publishers.slice() : [],
           trackedDependencies;
       
-      // Start tracking which bases, collections, and dependents this dependent depends on
-      _startTracking();
+      _startTracking(); // Start tracking which bases, collections, and dependents this dependent depends on
       
-      // Run the function
-      _currentValue = func.call(context);
+      _currentValue = func.call(context); // Run the function
       
-      // Stop tracking
-      trackedDependencies = _stopTracking();
+      trackedDependencies = _stopTracking();  // Stop tracking
       
-      // Find expired dependencies
-      var unbindFrom = _(boundDependencies).select(function(dependency) {
+      var unbindFrom = _(boundDependencies).select(function(dependency) {   // Find expired dependencies
         return !_(trackedDependencies).contains(dependency);
       });
       
-      // Find new dependencies
-      var bindTo = _(trackedDependencies).select(function(dependency) {
+      var bindTo = _(trackedDependencies).select(function(dependency) {   // Find new dependencies
         return !_(boundDependencies).contains(dependency);
       });
-    
-      // Unbind and bind to keep dependencies current
       
-      _(unbindFrom).each(function(subscribable) {
+      _(unbindFrom).each(function(subscribable) {   // Unbind expired dependencies
         subscribable.unsubscribe(_update);
       });
     
-      _(bindTo).each(function(subscribable) {
+      _(bindTo).each(function(subscribable) {   // Bind new dependencies
         subscribable.subscribe(_update);
       });
       
-      // Publish an update for subscribers
-      dependent.publish(_currentValue);
+      dependent.publish(_currentValue);   // Publish an update for subscribers
     }
     
     _update();
-    
     return dependent;
   }
   
   // Binding to DOM nodes
   
   ok.bind = function(viewModel, namespace) {
-    // Find all elements with a data-bind attribute
-    var boundNodes = ok.dom.nodesWithAttr('data-bind');
+    var boundNodes = ok.dom.nodesWithAttr('data-bind');   // Find all elements with a data-bind attribute
     
     _(boundNodes).each(function(node) {
-      // extract the attribute as a string
-      var bindingString = ok.dom.attr(node, 'data-bind');
+      var bindingString = ok.dom.attr(node, 'data-bind');   // extract the attribute as a string
       
-      // convert the attribute to an object
-      bindingString = 'var bindingObject = {' + bindingString + '}';
+      bindingString = 'var bindingObject = {' + bindingString + '}';   // convert the attribute to an object
       with(viewModel) {
         eval(bindingString);
       }
       
-      // register subscribables for each binding
-      _.each(bindingObject, function(subscribable, type) {
+      _.each(bindingObject, function(subscribable, type) {        // register subscribables for each binding
         _allBindings.push(ok.binding[type](node, subscribable));
       });
     });
