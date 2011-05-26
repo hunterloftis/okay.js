@@ -11,6 +11,9 @@
         event.preventDefault();
         event.stopPropagation();
       }
+    },
+    release: function() {
+      $(node).unbind('click', this.activate);
     }
   };
   

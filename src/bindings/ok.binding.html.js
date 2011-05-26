@@ -3,12 +3,15 @@
   function HtmlBinding(node, subscribable) {
     this.node = node;
     this.subscribable = subscribable;
-    subscribable.subscribe(_.bind(this.update, this));
+    subscribable.subscribe(this.update, this);
     this.update(subscribable());
   }
   HtmlBinding.prototype = {
     update: function(newValue) {
       ok.dom.html(this.node, newValue);
+    },
+    release: function() {
+      this.subscribable.unsubscribe(this.update);
     }
   };
   

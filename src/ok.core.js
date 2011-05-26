@@ -33,8 +33,12 @@
   // Subscribable Mixin
   
   var subscribable = {
-    subscribe: function(callback) {
-      this._subscriptions.push(callback);
+    subscribe: function(callback, context) {
+      var subscription = {
+        callback: callback,
+        context: context || this
+      };
+      this._subscriptions.push(subscription);             // TODO: Check that it doesn't already exist in _subscriptions
       callback._publishers = callback._publishers || [];
       if (!_(callback._publishers).contains(this)) {
         callback._publishers.push(this);
@@ -42,11 +46,13 @@
     },
     publish: function(val) {
       _(this._subscriptions).each(function(subscription) {
-        subscription.call(this, val);
+        subscription.callback.call(subscription.context, val);
       }, this);
     },
     unsubscribe: function(callback) {
-      this._subscriptions = _(this._subscriptions).without(callback);
+      this._subscriptions = _(this._subscriptions).reject(function(subscription) {
+        return (subscription.callback === callback);
+      });
       callback._publishers = _(callback._publishers).without(this);
     }
   };
@@ -183,11 +189,9 @@
       with(viewModel) {
         eval(bindingString);
       }
-      console.dir(bindingObject);
       
       // register subscribables for each binding
       _.each(bindingObject, function(subscribable, type) {
-        console.log("Binding on " + type);
         _allBindings.push(ok.binding[type](node, subscribable));
       });
     });
@@ -196,7 +200,10 @@
   // Unbinding a viewModel
   
   ok.unbind = function(viewModel, namespace) {
-    
+    _(_allBindings).each(function(binding) {
+      binding.release();
+    });
+    _allBindings = [];
   };
   
 })();

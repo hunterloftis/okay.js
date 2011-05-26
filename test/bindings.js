@@ -24,9 +24,7 @@ $(document).ready(function() {
     strictEqual($('#testVisible').css('display'), 'none', 'bind visible to a base value');
     strictEqual($('#testHtml').html(), 'invisible', 'bind html to a dependent value');
     
-    console.log("*** Changing visible...");
     viewModel.testVisible(true);
-    console.log("*** Changed");
     
     strictEqual($('#testVisible').css('display'), 'block', 'base value binding autoupdates');
     strictEqual($('#testHtml').html(), 'visible', 'dependent value binding autoupdates');
