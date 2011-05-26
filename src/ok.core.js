@@ -1,15 +1,16 @@
-// TODO - rename 'value' and 'result' to:
-// base and dependent
-
 (function() {
   
   // Create namespace
   
   var ok = window.ok = window.ok || {};
   
-  // Tracking
+  ok.dom = {};
+  ok.binding = {};
+  
+  // Private members
   
   var _tracking, _tracked;
+  var _allBindings = [];
   
   // Begin recording subscribable requests (dependencies)
   function _startTracking() {
@@ -50,7 +51,7 @@
     }
   };
   
-  // Allow an object to publish changes to itself
+  // Allow an object to publish changes of its value
   function _makeSubscribable(object) {
     object._subscriptions = [];
     object.subscribe = subscribable.subscribe;
@@ -167,6 +168,8 @@
     return dependent;
   }
   
+  // Binding to DOM nodes
+  
   ok.bind = function(viewModel, namespace) {
     // Find all elements with a data-bind attribute
     var boundNodes = ok.dom.nodesWithAttr('data-bind');
@@ -175,15 +178,25 @@
       // extract the attribute as a string
       var bindingString = ok.dom.attr(node, 'data-bind');
       
-      // convert the attribute to a JSON object
+      // convert the attribute to an object
       bindingString = 'var bindingObject = {' + bindingString + '}';
-      eval(bindingString);
+      with(viewModel) {
+        eval(bindingString);
+      }
       console.dir(bindingObject);
       
-      _.each(bindingObject, function(value, binding) {
-        console.log("Binding on " + binding);
+      // register subscribables for each binding
+      _.each(bindingObject, function(subscribable, type) {
+        console.log("Binding on " + type);
+        _allBindings.push(ok.binding[type](node, subscribable));
       });
     });
+  };
+  
+  // Unbinding a viewModel
+  
+  ok.unbind = function(viewModel, namespace) {
+    
   };
   
 })();

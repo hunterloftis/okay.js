@@ -7,14 +7,18 @@
     <script src="../support/zepto.min.js"></script>
     
     <script type="text/javascript" src="../support/underscore-min.js"></script>
-    <script src="../src/dom/ok.dom.zepto.js"></script>
     <script src="../src/ok.core.js"></script>
+    <script src="../src/dom/ok.dom.zepto.js"></script>
+    <script src="../src/bind/ok.bind.visible.js"></script>
+    <script src="../src/bind/ok.bind.html.js"></script>
+    <script src="../src/bind/ok.bind.click.js"></script>
     
 </head>
 <body>
 
-  <div data-bind='visible: "isVisible"'>
-    <p data-bind='text: "innerText"'></p>
+  <a href='#' data-bind='click: toggleVisible, html: toggleText'>Starting value</a>
+  <div data-bind='visible: isVisible'>
+    It's visible now!
   </div>
   
   <script>
@@ -22,8 +26,17 @@
     // View Models
     
     var viewModel = {
-      isVisible: ok.base(true),
-      innerText: ok.base('This text goes inside')
+      isVisible: ok.base(true)
+    };
+    viewModel.toggleText = ok.dependent(function() {
+      if (this.isVisible()) {
+        return 'Hide contents';
+      }
+      return 'Show contents';
+    }, viewModel);
+    viewModel.toggleVisible = function() {
+      viewModel.isVisible(!viewModel.isVisible());
+      return false;
     };
     
     // Bindings
