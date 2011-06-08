@@ -3,7 +3,7 @@
   function ClickBinding(node, callback) {
     this.node = node;
     this.callback = callback;
-    $(node).bind('click', this.activate)
+    $(node).bind('click', _.bind(this.activate, this));
   }
   ClickBinding.prototype = {
     activate: function(event) {
@@ -13,7 +13,7 @@
       }
     },
     release: function() {
-      $(node).unbind('click', this.activate);
+      $(node).unbind('click', this.callback);
     }
   };
   

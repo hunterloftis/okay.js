@@ -24,5 +24,16 @@ $(document).ready(function() {
     base('replaced');
     strictEqual(base(), 'replaced', 'can replace a stored base');
   });
+  
+  test("subscribing to updates", function() {
+    var base = ok.base('abc'),
+        val = base();
+    base.subscribe(function(newVal) {
+      val = newVal;
+    });
+    strictEqual(val, 'abc', 'initial value is correct');
+    base(123);
+    strictEqual(val, 123, 'subscription updates on value change');
+  });
 
 });
