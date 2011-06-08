@@ -34,9 +34,36 @@
     return _tracked;
   }
   
-  // Subscribable Mixin
-  
-  var subscribable = {
+  // Datum, the basis for all Okay data types
+
+  ok.Datum = function(definition) {
+    this._val;
+    this._subscriptions = [];
+    _(this).extend(definition);
+  }
+  ok.Datum.prototype = {
+    accessor: function() {
+      if (arguments.length > 0) {
+        return this.write(arguments[0]);
+      }
+      if (_tracking) _track(this);
+      return this.read();
+    },
+    read: function() {
+      return this._val;
+    },
+    write: function(val) {
+      this._val = val;
+      this.publish();
+      return this._val;
+    },
+    calc: function() {},
+    adapt: [],
+    publish: function() {
+      _(this._subscriptions).each(function(subscription) {
+        subscription.callback.call(subscription.context, this._val);
+      }, this);
+    },
     subscribe: function(callback, context) {
       var subscription = {
         callback: callback,
@@ -48,117 +75,13 @@
         callback._publishers.push(this);
       }
     },
-    publish: function(val) {
-      _(this._subscriptions).each(function(subscription) {
-        subscription.callback.call(subscription.context, val);
-      }, this);
-    },
     unsubscribe: function(callback) {
       this._subscriptions = _(this._subscriptions).reject(function(subscription) {
         return (subscription.callback === callback);
       });
       callback._publishers = _(callback._publishers).without(this);
     }
-  };
-  
-  function _makeSubscribable(object) {
-    object._subscriptions = [];
-    object.subscribe = subscribable.subscribe;
-    object.publish = subscribable.publish;
-    object.unsubscribe = subscribable.unsubscribe;
-  }
-  
-  // Bases
-  
-  ok.base = function(initializer) {
-    var _currentValue = initializer;
-    
-    function base() {
-      if (arguments.length > 0) {
-        // Is the value actually new?
-        if (_currentValue !== arguments[0]) {
-          _currentValue = arguments[0];
-          base.publish(_currentValue);
-        }
-        return this;
-      }
-      if (_tracking) _track(base);
-      return _currentValue;
-    }
-    _makeSubscribable(base);
-    return base;
-  }
-  
-  // Collections
-  
-  ok.collection = function(initializer) {
-    var _array = initializer;
-    
-    function collection() {
-      if (arguments.length > 0) {
-        _array = arguments[0];
-        return this;
-      }
-      return _array;
-    }
-    
-    function adapt(method) {
-      return function() {
-        return _array[method].apply(_array, arguments);
-      }
-    }
-    
-    _(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift']).each(function(method) {
-      collection[method] = adapt(method);
-    });
-    
-    return collection;
-  }
-  
-  // Dependents
-  
-  ok.dependent = function(func, context) {
-    var _currentValue;
-    
-    function dependent() {
-      if (_tracking) _track(dependent);
-      return _currentValue;
-    }
-
-    _makeSubscribable(dependent);
-    
-    function _update() {    
-      var boundDependencies = _update._publishers ? _update._publishers.slice() : [],
-          trackedDependencies;
-      
-      _startTracking(); // Start tracking which bases, collections, and dependents this dependent depends on
-      
-      _currentValue = func.call(context); // Run the function
-      
-      trackedDependencies = _stopTracking();  // Stop tracking
-      
-      var unbindFrom = _(boundDependencies).select(function(dependency) {   // Find expired dependencies
-        return !_(trackedDependencies).contains(dependency);
-      });
-      
-      var bindTo = _(trackedDependencies).select(function(dependency) {   // Find new dependencies
-        return !_(boundDependencies).contains(dependency);
-      });
-      
-      _(unbindFrom).each(function(subscribable) {   // Unbind expired dependencies
-        subscribable.unsubscribe(_update);
-      });
-    
-      _(bindTo).each(function(subscribable) {   // Bind new dependencies
-        subscribable.subscribe(_update);
-      });
-      
-      dependent.publish(_currentValue);   // Publish an update for subscribers
-    }
-    
-    _update();
-    return dependent;
-  }
+  };  
   
   // Binding to DOM nodes
   

@@ -1,4 +1,4 @@
-(function($) {
+(function(ok, $) {
 
   var dom = ok.dom;
   
@@ -26,4 +26,4 @@
     $(node).html(value);
   }
   
-})(Zepto);
+})(ok, Zepto);
