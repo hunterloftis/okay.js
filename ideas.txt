@@ -1,0 +1,3 @@
+just like makeSubscribable()... makeValidatable() (or something)
+
+this.first_name = ok.observable('').validate(function(fname) { ... });
