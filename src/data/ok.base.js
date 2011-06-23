@@ -3,6 +3,7 @@
   // Bases
     
   ok.Base = function() {}
+  
   ok.Base.prototype = new ok.Datum({});
   
   ok.base = function(initializer) {
@@ -10,28 +11,7 @@
     
     base.write(initializer);
     
-    return base.accessor;
+    return new Datum.accessor(base);    // needs GET (), SET (val), and .subscribe(fn)
   }
-  
-  // Bases
-  
-  ok.base = function(initializer) {
-    var _currentValue = initializer;
-    
-    function base() {
-      if (arguments.length > 0) {
-        // Is the value actually new?
-        if (_currentValue !== arguments[0]) {
-          _currentValue = arguments[0];
-          base.publish(_currentValue);
-        }
-        return this;
-      }
-      if (_tracking) _track(base);
-      return _currentValue;
-    }
-    _makeSubscribable(base);
-    return base;
-  };
 
 })(ok);
