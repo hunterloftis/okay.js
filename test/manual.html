@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>OkayJS Test Suite</title>
+    
+  <!-- Okay -->
+  
+  <script src="../support/underscore-min.js"></script>
+  <script src="../support/zepto.min.js"></script>
+  
+  <script src="../src/ok.core.js"></script>
+  
+  <script src="../src/dom/ok.dom.zepto.js"></script>
+  
+  <script src="../src/bindings/ok.binding.visible.js"></script>
+  <script src="../src/bindings/ok.binding.html.js"></script>
+  <script src="../src/bindings/ok.binding.click.js"></script>
+  <script src="../src/bindings/ok.binding.value.js"></script>
+  
+</head>
+<body>
+  
+  <div>
+    <p>These should match each other</p>
+    <input data-bind='value: valueBinding' />
+    <input data-bind='value: valueBinding' />
+  </div>
+  
+  <script>
+    var vm = {
+      valueBinding: ok.base('test')
+    };
+    ok.bind(vm);
+  </script>
+  
+</body>
+</html>
