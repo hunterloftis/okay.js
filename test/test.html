@@ -16,9 +16,11 @@
   <script src="../src/ok.core.js"></script>
   
   <script src="../src/dom/ok.dom.zepto.js"></script>
+  
   <script src="../src/bindings/ok.binding.visible.js"></script>
   <script src="../src/bindings/ok.binding.html.js"></script>
   <script src="../src/bindings/ok.binding.click.js"></script>
+  <script src="../src/bindings/ok.binding.value.js"></script>
   
   <!-- Tests -->
   
@@ -26,6 +28,9 @@
   <script type="text/javascript" src="collections.js"></script>
   <script type="text/javascript" src="dependents.js"></script>
   <script type="text/javascript" src="bindings.js"></script>
+  <script type="text/javascript" src="complex.js"></script>
+  
+  <script type="text/javascript" src="bindings/value.js"></script>
   
 </head>
 <body>
@@ -41,5 +46,8 @@
     <p id='namespace2' data-bind-namespace2='visible: visible'>namespace 2</p>
   </div>
 
+  <div id='testValue'>
+    <input id='valueInput' data-bind-value='value: testValue' />
+  </div>
 </body>
 </html>

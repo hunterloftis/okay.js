@@ -2,6 +2,8 @@
 
   var dom = ok.dom;
   
+  var bindings = {};
+  
   dom.nodesWithAttr = function(attr) {
     return $('*[' + attr + ']');
   };
@@ -24,6 +26,22 @@
 
   dom.html = function(node, value) {
     $(node).html(value);
+  }
+  
+  dom.value = function(node, value) {
+    return $(node).val(value);
+  }
+  
+  dom.bind = function(node, event, callback, context) {
+    var handler = function() {
+      callback.call(context);
+    }
+    $(node).bind(event, handler);
+    return handler;
+  }
+  
+  dom.unbind = function(node, event, handler) {
+    $(node).unbind(event, handler);
   }
   
 })(Zepto);
