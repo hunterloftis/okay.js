@@ -28,10 +28,13 @@ $(document).ready(function() {
     strictEqual($('#testHtml').html(), 'visible', 'dependent value binding autoupdates');
     
     ok.unbind();
+
     viewModel.testVisible(false);
     
-    strictEqual($('#testVisible').css('display'), 'block', 'unbind base view model');
-    strictEqual($('#testHtml').html(), 'visible', 'unbind dependent view model');
+    strictEqual(viewModel.testVisible(), false, 'viewmodel base is changed');
+    strictEqual(viewModel.testHtml(), 'invisible', 'viewmodel dependent is changed');
+    strictEqual($('#testVisible').css('display'), 'block', 'view bound to base is unchanged');
+    strictEqual($('#testHtml').html(), 'visible', 'view bound to dependent is unchanged');
     
   });
   

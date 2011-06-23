@@ -164,8 +164,12 @@
   
   ok.bind = function(viewModel, namespace) {
     namespace = namespace || '';
+    console.log("Binding namespace '" + namespace + "'")
     var dataAttr = _dataAttr + (namespace.length > 0 ? '-' + namespace : '');
-    var boundNodes = ok.dom.nodesWithAttr(dataAttr);   // Find all elements with a data-bind attribute
+    
+    // Find all elements with a data-bind(-namespace) attribute
+    var boundNodes = ok.dom.nodesWithAttr(dataAttr),
+        allBindings = _allBindings[namespace] = [];
     
     _(boundNodes).each(function(node) {
       
@@ -176,9 +180,11 @@
         eval(bindingString);
       }
       
-      var allBindings = _allBindings[namespace] = [];
       _.each(bindingObject, function(subscribable, type) {        // register subscribables for each binding
-        allBindings.push(ok.binding[type](node, subscribable));
+        var binding = ok.binding[type](node, subscribable);
+        allBindings.push(binding);
+        console.log("Created binding:")
+        console.dir(binding);
       });
     });
   };
@@ -187,9 +193,12 @@
   
   ok.unbind = function(namespace) {
     namespace = namespace || '';
+    console.log("UNBinding namespace '" + namespace + "'")
     var allBindings = _allBindings[namespace];
     if(allBindings) {
       _(allBindings).each(function(binding) {
+        console.log("Releasing binding:")
+        console.dir(binding);
         binding.release();
       });
       _allBindings[namespace] = [];
