@@ -14,6 +14,13 @@ $(document).ready(function() {
     strictEqual(collection()[0], 0, 'collection can be replaced');
   });
   
+  test("undefined collections", function() {
+    var collection = ok.collection();
+    strictEqual(typeof(collection()), 'undefined', 'collection can be instantiated without an array');
+    collection.push(1);
+    strictEqual(collection()[0], 1, 'array method access converts undefined collection to empty array')
+  });
+  
   test("array methods on collection object (pop, push, reverse, etc...)", function() {
     var a = [], collection, i, ret;
     for (i = 0; i < 100; i++) {
@@ -41,6 +48,21 @@ $(document).ready(function() {
     collection.unshift('beginning');
     strictEqual(collection()[0], 'beginning', '.unshift adds value to beginning of array');
     strictEqual(collection().length, 98, '.unshift increases length of array');
+  });
+  
+  test('tracking dependencies on collections', function() {
+    var collection = ok.collection([1, 2, 3]),
+        dependent = ok.dependent(function() {
+          var c = collection();
+          return c[c.length - 1];
+        });
+    strictEqual(collection().length, 3, 'collection has a length of 3');
+    strictEqual(collection()[0], 1, 'collection starts with 1');
+    strictEqual(collection()[2], 3, 'collection ends with 3');
+    strictEqual(dependent(), 3, 'dependent maps to last element in collection');
+    collection.push(4);
+    strictEqual(collection().length, 4, 'collection now has a length of 5');
+    strictEqual(dependent(), 4, 'dependent still maps to last element in collection');
   });
 
 });

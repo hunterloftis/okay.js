@@ -73,14 +73,5 @@ $(document).ready(function() {
     strictEqual($('#namespace1').css('display'), 'block', 'namespaces can be unbound');
     strictEqual($('#namespace2').css('display'), 'block', 'other namespaces are unaffected');
   });
-
-  /*  
-  test("bindings on collections", function() {
-    strictEqual(obj.dependentTriple(), 3, 'bind visible to a base value');
-    strictEqual(obj.dependentTriple(), 6, 'bind visible to a dependent value');
-    strictEqual(obj.dependentTriple(), 6, 'bind text to a base value');
-    strictEqual(obj.dependentTriple(), 6, 'bind text to a dependent value');
-  });
-  */
-  
+    
 });

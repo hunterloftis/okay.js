@@ -97,14 +97,19 @@
     function collection() {
       if (arguments.length > 0) {
         _array = arguments[0];
+        collection.publish(_array);
         return this;
       }
+      if (_tracking) _track(collection);
       return _array;
     }
     
     function adapt(method) {
       return function() {
-        return _array[method].apply(_array, arguments);
+        if (typeof(_array) === 'undefined') _array = [];        // TODO: Evaluate whether or not this is the best behavior
+        var result = _array[method].apply(_array, arguments);
+        collection.publish(_array);
+        return result;
       }
     }
     
@@ -112,6 +117,7 @@
       collection[method] = adapt(method);
     });
     
+    _makeSubscribable(collection);
     return collection;
   }
   
@@ -164,7 +170,6 @@
   
   ok.bind = function(viewModel, namespace) {
     namespace = namespace || '';
-    console.log("Binding namespace '" + namespace + "'")
     var dataAttr = _dataAttr + (namespace.length > 0 ? '-' + namespace : '');
     
     // Find all elements with a data-bind(-namespace) attribute
@@ -183,8 +188,6 @@
       _.each(bindingObject, function(subscribable, type) {        // register subscribables for each binding
         var binding = ok.binding[type](node, subscribable);
         allBindings.push(binding);
-        console.log("Created binding:")
-        console.dir(binding);
       });
     });
   };
@@ -193,12 +196,9 @@
   
   ok.unbind = function(namespace) {
     namespace = namespace || '';
-    console.log("UNBinding namespace '" + namespace + "'")
     var allBindings = _allBindings[namespace];
     if(allBindings) {
       _(allBindings).each(function(binding) {
-        console.log("Releasing binding:")
-        console.dir(binding);
         binding.release();
       });
       _allBindings[namespace] = [];

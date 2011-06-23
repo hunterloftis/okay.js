@@ -28,7 +28,7 @@ $(document).ready(function() {
     strictEqual(dependent, 6, 'subscription updates dependent automatically')
   });
   
-  test('tracking dependencies', function() {
+  test('tracking dependencies on bases', function() {
     var obj = {}, dependent, secondary;
     obj.toggled = ok.base(false);
     obj.first = ok.base('first');
@@ -57,6 +57,19 @@ $(document).ready(function() {
     obj.toggled(true);
     strictEqual(dependent, 'second', 'dependent evaluates accurately after dependency switch');
     strictEqual(secondary, 'second-secondary', 'dependent dependent on another dependent updates automatically');
+  });
+  
+  test('tracking dependencies on dependents', function() {
+    var base = ok.base(1),
+        dep1 = ok.dependent(function() {
+          return base() + 1;
+        }),
+        dep2 = ok.dependent(function() {
+          return dep1() + 1;
+        });
+    strictEqual(base(), 1, 'base evaluates to 1');
+    strictEqual(dep1(), 2, 'primary dependent evaluates to 2');
+    strictEqual(dep2(), 3, 'secondary dependent evaluates to 3');
   });
   
 });

@@ -25,6 +25,13 @@ $(document).ready(function() {
     strictEqual(base(), 'replaced', 'can replace a stored base');
   });
   
+  test("undefined bases", function() {
+    var base = ok.base();
+    strictEqual(typeof(base()), 'undefined', 'empty base returns undefined');
+    base('okay');
+    strictEqual(base(), 'okay', 'assigning a value to an empty base works');
+  });
+  
   test("subscribing to updates", function() {
     var base = ok.base('abc'),
         val = base();
