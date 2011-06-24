@@ -21,6 +21,7 @@
   <script src="../src/bindings/ok.binding.html.js"></script>
   <script src="../src/bindings/ok.binding.click.js"></script>
   <script src="../src/bindings/ok.binding.value.js"></script>
+  <script src="../src/bindings/ok.binding.repeat.js"></script>
   
   <!-- Tests -->
   
@@ -31,6 +32,7 @@
   <script type="text/javascript" src="complex.js"></script>
   
   <script type="text/javascript" src="bindings/value.js"></script>
+  <script type="text/javascript" src="bindings/repeat.js"></script>
   
 </head>
 <body>
@@ -49,5 +51,17 @@
   <div id='testValue'>
     <input id='valueInput' data-bind-value='value: testValue' />
   </div>
+  
+  <div id='testRepeat'>
+    <ul data-bind-repeat='repeat: { template: "productTemplate", collection: products }'></ul>
+  </div>
+  
+  <script id='productTemplate' type='text/html'>
+    <li>
+      <h3 data-bind='html: name'>Name</h3>
+      <p>$<span data-bind='html: price'>Price</span></p>
+    </li>
+  </script>
+  
 </body>
 </html>

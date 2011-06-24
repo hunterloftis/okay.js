@@ -4,7 +4,10 @@
   
   var bindings = {};
   
-  dom.nodesWithAttr = function(attr) {
+  dom.nodesWithAttr = function(attr, containerNode) {
+    if (containerNode) {
+      return $(containerNode).find('*[' + attr + ']');
+    }
     return $('*[' + attr + ']');
   };
   

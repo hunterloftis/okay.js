@@ -166,14 +166,15 @@
     return dependent;
   }
   
-  // Binding to DOM nodes
+  // Binding a namespace to the DOM
   
-  ok.bind = function(viewModel, namespace) {
+  ok.bind = function(viewModel, namespace, containerNode) {
     namespace = namespace || '';
+    
     var dataAttr = _dataAttr + (namespace.length > 0 ? '-' + namespace : '');
     
     // Find all elements with a data-bind(-namespace) attribute
-    var boundNodes = ok.dom.nodesWithAttr(dataAttr),
+    var boundNodes = ok.dom.nodesWithAttr(dataAttr, containerNode),
         allBindings = _allBindings[namespace] = [];
     
     _(boundNodes).each(function(node) {
@@ -186,13 +187,13 @@
       }
       
       _.each(bindingObject, function(subscribable, type) {        // register subscribables for each binding
-        var binding = ok.binding[type](node, subscribable);
+        var binding = ok.binding[type](node, subscribable, viewModel);
         allBindings.push(binding);
       });
     });
   };
   
-  // Unbinding a namespace
+  // Unbinding a namespace from the DOM
   
   ok.unbind = function(namespace) {
     namespace = namespace || '';
