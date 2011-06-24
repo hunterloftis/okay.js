@@ -5,6 +5,7 @@
   var ok = window.ok = window.ok || {};
   
   ok.dom = {};
+  ok.template = {};
   ok.binding = {};
   
   // Private members
@@ -142,6 +143,9 @@
       _currentValue = func.call(context); // Run the function
       
       trackedDependencies = _stopTracking();  // Stop tracking
+      
+      // TODO: Make this configurable (so you can turn off live dependecy tracking)
+      //      That would increase the speed of dependents (esp. for mobile)
       
       var unbindFrom = _(boundDependencies).select(function(dependency) {   // Find expired dependencies
         return !_(trackedDependencies).contains(dependency);

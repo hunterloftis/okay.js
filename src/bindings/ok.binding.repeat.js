@@ -34,7 +34,7 @@
       ok.dom.html(self.node, '');
       
       _(array).each(function(item) {
-        var newNode = ok.dom.createNode(_.template(templateHtml, item));
+        var newNode = ok.dom.createNode(ok.template.render(templateHtml, item));
         ok.bind(item, null, newNode);
         ok.dom.append(self.node, newNode);
       });

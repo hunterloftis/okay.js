@@ -16,6 +16,7 @@
   <script src="../src/ok.core.js"></script>
   
   <script src="../src/dom/ok.dom.zepto.js"></script>
+  <script src="../src/template/ok.template.underscore.js"></script>
   
   <script src="../src/bindings/ok.binding.visible.js"></script>
   <script src="../src/bindings/ok.binding.html.js"></script>
@@ -53,7 +54,7 @@
   </div>
   
   <div id='testRepeat'>
-    <ul data-bind-repeat='repeat: { template: "productTemplate", collection: products }'></ul>
+    <ul data-bind-repeat='repeat: { template: "productTemplate", collection: products }'><li>Test</li><li>test2</li><li>test3</li></ul>
   </div>
   
   <script id='productTemplate' type='text/html'>

@@ -1,3 +1,7 @@
 just like makeSubscribable()... makeValidatable() (or something)
-
 this.first_name = ok.observable('').validate(function(fname) { ... });
+
+"static" dependents that don't check their dependencies every time anything happens... they evaluate their dependencies when initialized, and then never again
+this.somethingSimple = ok.dependent(function() { ... }, this).static();
+
+Delays on bindings (maybe _.debounce?) so that UI bindings wait a second before updating, to try to pool lots of sequential updates into one smaller one
