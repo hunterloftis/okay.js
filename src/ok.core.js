@@ -67,6 +67,7 @@
     object.subscribe = subscribable.subscribe;
     object.publish = subscribable.publish;
     object.unsubscribe = subscribable.unsubscribe;
+    object.__isSubscribable = true;
   }
   
   // Bases
@@ -211,6 +212,17 @@
     else {
       throw new Error("Nothing is bound to namespace '" + namespace + "'");
     }
+  };
+  
+  // Safe way for bindings to subscribe
+  
+  ok.safeSubscribe = function(mystery, fn, context) {
+    if (mystery.subscribe) {
+      mystery.subscribe(fn, context);
+      fn.call(context, mystery());
+      return;
+    }
+    fn.call(context, mystery);    // Just send value straightaway
   };
   
 })();

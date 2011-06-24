@@ -17,7 +17,7 @@ $(document).ready(function() {
     strictEqual(ul.children().size(), 0, 'Container node is empty while collection is empty');
     
     vm.products.push({
-      name: ok.base('Product name A'),
+      name: 'Product name A',
       price: ok.base(1)
     });
     

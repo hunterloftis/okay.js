@@ -13,8 +13,7 @@
     this.templateId = '#' + options.template;
     this.subscribable = options.collection;
     
-    this.subscribable.subscribe(this.update, this);
-    this.update(this.subscribable());
+    ok.safeSubscribe(this.subscribable, this.update, this);
   }
   
   RepeatBinding.prototype = {
