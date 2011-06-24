@@ -8,8 +8,6 @@
  */
 
   function RepeatBinding(node, options, vm) {
-    console.log("Collection:");
-    console.dir(options.collection());
     
     this.node = node;
     this.templateId = '#' + options.template;
@@ -29,17 +27,17 @@
     update: function(array) {
       var self = this,
           html = '',
-          templateHtml = $(this.templateId).html(); //ok.dom.html(this.templateId);
+          templateHtml = ok.dom.html(this.templateId);
+      
+      // For now, clear everything and refresh the whole repeater every time the collection changes
+      // TODO: Add/remove repeated nodes intelligently
+      ok.dom.html(self.node, '');
       
       _(array).each(function(item) {
-        console.log("rendering item: " + item.name());
-        var newNode = $(_.template(templateHtml, item));
-        console.dir(item);
+        var newNode = ok.dom.createNode(_.template(templateHtml, item));
         ok.bind(item, null, newNode);
-        $(self.node).append(newNode);
+        ok.dom.append(self.node, newNode);
       });
-      
-      //ok.dom.html(this.node, html);
     },
     
     release: function() {

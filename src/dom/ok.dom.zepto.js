@@ -11,6 +11,14 @@
     return $('*[' + attr + ']');
   };
   
+  dom.createNode = function(html) {
+    return $(html);
+  }
+  
+  dom.append = function(parent, child) {
+    $(parent).append(child);
+  }
+  
   dom.attr = function(node, attr) {
     return $(node).attr(attr);
   }
@@ -28,7 +36,7 @@
   }
 
   dom.html = function(node, value) {
-    $(node).html(value);
+    return $(node).html(value);
   }
   
   dom.value = function(node, value) {

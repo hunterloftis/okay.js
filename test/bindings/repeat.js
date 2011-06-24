@@ -23,9 +23,6 @@ $(document).ready(function() {
       price: ok.base(5)
     });
     
-    console.log("Products");
-    console.dir(vm.products());
-    
     ok.bind(vm, 'repeat');
     
     vm.products()[1].name('Updated product name');
