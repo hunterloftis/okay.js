@@ -19,6 +19,18 @@
     $(parent).append(child);
   }
   
+  dom.remove = function(node) {
+    $(node).remove();
+  }
+  
+  dom.after = function(first, second) {
+    $(first).after(second);
+  }
+  
+  dom.before = function(second, first) {
+    $(second).before(first);
+  }
+  
   dom.attr = function(node, attr) {
     return $(node).attr(attr);
   }

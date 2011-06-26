@@ -25,7 +25,7 @@ $(document).ready(function() {
     
     vm.products.push({
       name: ok.base('Product name B'),
-      price: ok.base(5)
+      price: 5
     });
     
     strictEqual(ul.children().size(), 2, 'Container successfully updates after second item is added');
@@ -33,10 +33,31 @@ $(document).ready(function() {
     strictEqual(ul.children().first().find('span').html(), '1', 'price of first item is accurate');
     
     vm.products()[1].name('Updated product name');
+    
     vm.products()[0].price(100);
     
     strictEqual(ul.children().last().find('h3').html(), 'Updated product name', 'Updated H3 of second item is accurate');
     strictEqual(ul.children().first().find('span').html(), '100', 'updated price of first item is accurate');
+    
+    vm.products.push({
+      name: ok.base('Product name C'),
+      price: ok.base(27)
+    });
+    
+    strictEqual(ul.children().last().find('h3').html(), 'Product name C', 'H3 of new item is accurate');
+    
+    vm.products.splice(1, 1);
+    
+    strictEqual(ul.children().size(), 2, 'Container successfully removed middle item');
+    strictEqual(ul.children().last().find('h3').html(), 'Product name C', 'H3 is still accurate after removing middle item');
+    
+    vm.products([{
+      name: 'Final name',
+      price: 1337
+    }]);
+    
+    strictEqual(ul.children().size(), 1, 'Setting an entirely new array updates the UI');
+    strictEqual(ul.children().last().find('h3').html(), 'Final name', 'H3 is Final name');
     
   });
   
