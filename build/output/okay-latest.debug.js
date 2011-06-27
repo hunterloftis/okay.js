@@ -4,7 +4,7 @@
 // Version 0.1.0
 window['ok'] = window['ok'] || {};
 
-(function(ok) {
+(function(ok, _) {
     
   // Namespaces
   
@@ -229,7 +229,7 @@ window['ok'] = window['ok'] || {};
     fn.call(context, mystery);    // Just send value straightaway
   };
   
-})(ok);(function($) {
+})(window['ok'], window['_']);(function(ok, $) {
 
   var dom = ok.dom;
   
@@ -298,15 +298,15 @@ window['ok'] = window['ok'] || {};
     $(node).unbind(event, handler);
   }
   
-})(Zepto);(function(_) {
+})(window['ok'], window['Zepto']);(function(ok, _) {
 
-  var template = ok.template;
+  var template = ok['template'];
     
   template.render = function(html, object) {
     return _.template(html, object)
   }
   
-})(_);(function(ok) {
+})(window['ok'], window['_']);(function(ok) {
 
   function VisibleBinding(node, subscribable) {
     this.node = node;

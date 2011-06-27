@@ -1,6 +1,6 @@
 window['ok'] = window['ok'] || {};
 
-(function(ok) {
+(function(ok, _) {
     
   // Namespaces
   
@@ -225,4 +225,4 @@ window['ok'] = window['ok'] || {};
     fn.call(context, mystery);    // Just send value straightaway
   };
   
-})(ok);
+})(window['ok'], window['_']);

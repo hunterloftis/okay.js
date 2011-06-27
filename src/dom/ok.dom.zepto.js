@@ -1,4 +1,4 @@
-(function($) {
+(function(ok, $) {
 
   var dom = ok.dom;
   
@@ -67,4 +67,4 @@
     $(node).unbind(event, handler);
   }
   
-})(Zepto);
+})(window['ok'], window['Zepto']);
