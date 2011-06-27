@@ -17,7 +17,7 @@
     }
   };
   
-  ok.binding.click = function(node, callback) {
+  ok.binding['click'] = function(node, callback) {
     return new ClickBinding(node, callback);
   };
   

@@ -1,0 +1,8 @@
+src/ok.core.js
+src/dom/ok.dom.zepto.js
+src/template/ok.template.underscore.js
+src/bindings/ok.binding.visible.js
+src/bindings/ok.binding.html.js
+src/bindings/ok.binding.click.js
+src/bindings/ok.binding.value.js
+src/bindings/ok.binding.repeat.js

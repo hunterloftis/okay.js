@@ -14,7 +14,7 @@
     }
   };
   
-  ok.binding.html = function(node, subscribable) {
+  ok.binding['html'] = function(node, subscribable) {
     return new HtmlBinding(node, subscribable);
   };
   

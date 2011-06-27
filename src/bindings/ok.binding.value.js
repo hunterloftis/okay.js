@@ -20,7 +20,7 @@
     }
   };
   
-  ok.binding.value = function(node, subscribable) {
+  ok.binding['value'] = function(node, subscribable) {
     return new ValueBinding(node, subscribable);
   };
   

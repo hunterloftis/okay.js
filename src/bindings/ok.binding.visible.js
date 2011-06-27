@@ -19,7 +19,7 @@
     }
   };
   
-  ok.binding.visible = function(node, subscribable) {
+  ok.binding['visible'] = function(node, subscribable) {
     return new VisibleBinding(node, subscribable);
   };
   

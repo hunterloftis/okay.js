@@ -1,12 +1,12 @@
-(function() {
+window['ok'] = window['ok'] || {};
+
+(function(ok) {
+    
+  // Namespaces
   
-  // Create namespace
-  
-  var ok = window.ok = window.ok || {};
-  
-  ok.dom = {};
-  ok.template = {};
-  ok.binding = {};
+  ok['dom'] = {};
+  ok['template'] = {};
+  ok['binding'] = {};
   
   // Private members
   
@@ -64,15 +64,15 @@
   
   function _makeSubscribable(object) {
     object._subscriptions = [];
-    object.subscribe = subscribable.subscribe;
-    object.publish = subscribable.publish;
-    object.unsubscribe = subscribable.unsubscribe;
+    object['subscribe'] = subscribable.subscribe;
+    object['publish'] = subscribable.publish;
+    object['unsubscribe'] = subscribable.unsubscribe;
     object.__isSubscribable = true;
   }
   
   // Bases
   
-  ok.base = function(initializer) {
+  ok['base'] = function(initializer) {
     var _currentValue = initializer;
     
     function base() {
@@ -93,7 +93,7 @@
   
   // Collections
   
-  ok.collection = function(initializer) {
+  ok['collection'] = function(initializer) {
     var _array = initializer;
     
     function collection() {
@@ -125,7 +125,7 @@
   
   // Dependents
   
-  ok.dependent = function(func, context) {
+  ok['dependent'] = function(func, context) {
     var _currentValue;
     
     function dependent() {
@@ -173,7 +173,7 @@
   
   // Binding a namespace to the DOM
   
-  ok.bind = function(viewModel, namespace, containerNode) {
+  ok['bind'] = function(viewModel, namespace, containerNode) {
     namespace = namespace || '';
     
     var dataAttr = _dataAttr + (namespace.length > 0 ? '-' + namespace : '');
@@ -200,7 +200,7 @@
   
   // Unbinding a namespace from the DOM
   
-  ok.unbind = function(namespace) {
+  ok['unbind'] = function(namespace) {
     namespace = namespace || '';
     var allBindings = _allBindings[namespace];
     if(allBindings) {
@@ -216,7 +216,7 @@
   
   // Safe way for bindings to subscribe
   
-  ok.safeSubscribe = function(mystery, fn, context) {
+  ok['safeSubscribe'] = function(mystery, fn, context) {
     if (mystery.subscribe) {
       mystery.subscribe(fn, context);
       fn.call(context, mystery());
@@ -225,4 +225,4 @@
     fn.call(context, mystery);    // Just send value straightaway
   };
   
-})();
+})(ok);

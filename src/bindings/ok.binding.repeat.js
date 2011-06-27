@@ -96,7 +96,7 @@
     }
   };
   
-  ok.binding.repeat = function(node, subscribable, vm) {
+  ok.binding['repeat'] = function(node, subscribable, vm) {
     return new RepeatBinding(node, subscribable, vm);
   };
   
