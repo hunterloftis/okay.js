@@ -193,7 +193,12 @@ window['ok'] = window['ok'] || {};
       
       _.each(bindingObject, function(subscribable, type) {        // register subscribables for each binding
         var binding = ok.binding[type](node, subscribable, viewModel);
-        allBindings.push(binding);
+        if (binding instanceof Array) {
+          allBindings.concat(binding)
+        }
+        else {
+          allBindings.push(binding);
+        }
       });
     });
   };

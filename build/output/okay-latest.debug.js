@@ -197,7 +197,12 @@ window['ok'] = window['ok'] || {};
       
       _.each(bindingObject, function(subscribable, type) {        // register subscribables for each binding
         var binding = ok.binding[type](node, subscribable, viewModel);
-        allBindings.push(binding);
+        if (binding instanceof Array) {
+          allBindings.concat(binding)
+        }
+        else {
+          allBindings.push(binding);
+        }
       });
     });
   };
@@ -549,6 +554,32 @@ window['ok'] = window['ok'] || {};
   
   ok.binding['repeat'] = function(node, subscribable, vm) {
     return new RepeatBinding(node, subscribable, vm);
+  };
+  
+})(ok);(function(ok) {
+  
+  function CssBinding(node, className, subscribable) {
+    this.node = node;
+    this.className = className;
+    this.subscribable = subscribable;
+    ok.safeSubscribe(subscribable, this.update, this);
+  }
+  CssBinding.prototype = {
+    update: function(newValue) {
+      if (newValue) $(this.node).addClass(this.className);
+      else $(this.node).removeClass(this.className);
+    },
+    release: function() {
+      this.subscribable.unsubscribe(this.update);
+    }
+  };
+  
+  ok.binding['css'] = function(node, classes, vm) {
+    var bindings = [];
+    for (var className in classes) {
+      bindings.push(new CssBinding(node, className, classes[className]));  
+    };
+    return bindings;
   };
   
 })(ok);
