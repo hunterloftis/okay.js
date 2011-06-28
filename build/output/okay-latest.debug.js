@@ -353,14 +353,15 @@ window['ok'] = window['ok'] || {};
   
 })(ok);(function(ok) {
 
-  function ClickBinding(node, callback) {
+  function ClickBinding(node, callback, vm) {
     this.node = node;
     this.callback = callback;
+    this.vm = vm;
     $(node).bind('click', _.bind(this.activate, this));
   }
   ClickBinding.prototype = {
     activate: function(event) {
-      if (!this.callback()) {
+      if (!this.callback.call(this.vm, [event])) {
         event.preventDefault();
         event.stopPropagation();
       }
@@ -370,8 +371,8 @@ window['ok'] = window['ok'] || {};
     }
   };
   
-  ok.binding['click'] = function(node, callback) {
-    return new ClickBinding(node, callback);
+  ok.binding['click'] = function(node, callback, vm) {
+    return new ClickBinding(node, callback, vm);
   };
   
 })(ok);(function(ok) {
@@ -396,6 +397,30 @@ window['ok'] = window['ok'] || {};
   
   ok.binding['submit'] = function(node, callback, vm) {
     return new SubmitBinding(node, callback, vm);
+  };
+  
+})(ok);(function(ok) {
+
+  function TapBinding(node, callback, vm) {
+    this.node = node;
+    this.callback = callback;
+    this.vm = vm;
+    $(node).bind('touchstart click', _.bind(this.activate, this));
+  }
+  TapBinding.prototype = {
+    activate: function(event) {
+      if (!this.callback.call(this.vm, [event])) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    },
+    release: function() {
+      $(node).unbind('touchstart click', this.callback);
+    }
+  };
+  
+  ok.binding['tap'] = function(node, callback, vm) {
+    return new TapBinding(node, callback, vm);
   };
   
 })(ok);(function(ok) {

@@ -1,12 +1,12 @@
 (function(ok) {
 
-  function ClickBinding(node, callback, vm) {
+  function TapBinding(node, callback, vm) {
     this.node = node;
     this.callback = callback;
     this.vm = vm;
-    $(node).bind('click', _.bind(this.activate, this));
+    $(node).bind('touchstart click', _.bind(this.activate, this));
   }
-  ClickBinding.prototype = {
+  TapBinding.prototype = {
     activate: function(event) {
       if (!this.callback.call(this.vm, [event])) {
         event.preventDefault();
@@ -14,12 +14,12 @@
       }
     },
     release: function() {
-      $(node).unbind('click', this.callback);
+      $(node).unbind('touchstart click', this.callback);
     }
   };
   
-  ok.binding['click'] = function(node, callback, vm) {
-    return new ClickBinding(node, callback, vm);
+  ok.binding['tap'] = function(node, callback, vm) {
+    return new TapBinding(node, callback, vm);
   };
   
 })(ok);
