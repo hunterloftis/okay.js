@@ -15,6 +15,7 @@
   <script src="../src/bindings/ok.binding.visible.js"></script>
   <script src="../src/bindings/ok.binding.html.js"></script>
   <script src="../src/bindings/ok.binding.click.js"></script>
+  <script src="../src/bindings/ok.binding.submit.js"></script>
   <script src="../src/bindings/ok.binding.value.js"></script>
   
   <style>
@@ -39,9 +40,14 @@
     <p>When you click on this, it should toggle visibility</p>
     <a href='#' data-bind='click: third'>Click here</a>
     <p data-bind='visible: fourth'>Now I'm visible!</p>
+    <p>This form should stop your submit</p>
+    <form data-bind='submit: interrupt'>
+      <input type='submit' value='try it' />
+    </form>
   </div>
   
   <script>
+    console.log("Loading...")
     var vm = {
       first: ok.base('test'),
       fourth: ok.base(false)
@@ -55,6 +61,11 @@
       vm.fourth(!vm.fourth());
       return false;
     };
+    
+    vm.interrupt = function(event) {
+      console.log("Interrupted form submit");
+      console.log("VM data: " + this.first());
+    }
     
     ok.bind(vm);
   </script>
