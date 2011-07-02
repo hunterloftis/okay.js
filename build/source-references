@@ -1,4 +1,5 @@
 src/ok.core.js
+src/ok.utils.js
 src/dom/ok.dom.zepto.js
 src/template/ok.template.underscore.js
 src/bindings/ok.binding.visible.js

@@ -234,7 +234,31 @@ window['ok'] = window['ok'] || {};
     fn.call(context, mystery);    // Just send value straightaway
   };
   
-})(window['ok'], window['_']);(function(ok, $) {
+})(window['ok'], window['_']);(function(ok, _) {
+  
+  var utils = ok.utils = {};
+  
+  utils.toJSON = function toJSON(object) {
+    if (typeof(object) === 'function') {
+      if (object.__isSubscribable) {
+        return toJSON(object());
+      }
+    }
+    else if (typeof(object) === 'object') {
+      var obj;
+      if (object instanceof Array) obj = [];
+      else obj = {};
+      for (var key in object) {
+        obj[key] = toJSON(object[key]);
+      }
+      return obj;
+    }
+    else {
+      return object;  // Native types
+    }
+  }
+  
+})(ok, _);(function(ok, $) {
 
   var dom = ok.dom;
   
@@ -410,7 +434,7 @@ window['ok'] = window['ok'] || {};
     this.node = node;
     this.callback = callback;
     this.vm = vm;
-    $(node).bind('touchstart click', _.bind(this.activate, this));
+    $(node).bind('tap', _.bind(this.activate, this));
   }
   TapBinding.prototype = {
     activate: function(event) {
@@ -420,7 +444,7 @@ window['ok'] = window['ok'] || {};
       }
     },
     release: function() {
-      $(node).unbind('touchstart click', this.callback);
+      $(node).unbind('tap', this.callback);
     }
   };
   
