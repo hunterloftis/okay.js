@@ -20,6 +20,6 @@
     else {
       return object;  // Native types
     }
-  }
+  };
   
 })(ok, _);

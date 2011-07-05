@@ -173,7 +173,14 @@ window['ok'] = window['ok'] || {};
     
     _update();
     return dependent;
-  }
+  };
+  
+  // TODO: Cross-browser test and replace with eval() if necessary
+  
+  ok['dep'] = function(str, context) {
+    var fn = new Function('return ' + str);
+    return ok['dependent'](fn, context);
+  };
   
   // Binding a namespace to the DOM
   
@@ -256,7 +263,7 @@ window['ok'] = window['ok'] || {};
     else {
       return object;  // Native types
     }
-  }
+  };
   
 })(ok, _);(function(ok, $) {
 
@@ -435,6 +442,8 @@ window['ok'] = window['ok'] || {};
     this.callback = callback;
     this.vm = vm;
     $(node).bind('tap', _.bind(this.activate, this));
+    $(node).bind('touchstart', _.bind(this.btn_down, this));
+    $(node).bind('touchend', _.bind(this.btn_up, this));
   }
   TapBinding.prototype = {
     activate: function(event) {
@@ -444,7 +453,13 @@ window['ok'] = window['ok'] || {};
       }
     },
     release: function() {
-      $(node).unbind('tap', this.callback);
+      //$(this.node).unbind('tap', this.callback);
+    },
+    btn_down: function(event) {
+      $(this.node).addClass('ok_down');
+    },
+    btn_up: function(event) {
+      $(this.node).removeClass('ok_down');
     }
   };
   

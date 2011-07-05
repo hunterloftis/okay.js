@@ -5,6 +5,8 @@
     this.callback = callback;
     this.vm = vm;
     $(node).bind('tap', _.bind(this.activate, this));
+    $(node).bind('touchstart', _.bind(this.btn_down, this));
+    $(node).bind('touchend', _.bind(this.btn_up, this));
   }
   TapBinding.prototype = {
     activate: function(event) {
@@ -14,7 +16,13 @@
       }
     },
     release: function() {
-      $(node).unbind('tap', this.callback);
+      //$(this.node).unbind('tap', this.callback);
+    },
+    btn_down: function(event) {
+      $(this.node).addClass('ok_down');
+    },
+    btn_up: function(event) {
+      $(this.node).removeClass('ok_down');
     }
   };
   
