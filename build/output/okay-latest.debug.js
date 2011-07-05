@@ -14,7 +14,10 @@ window['ok'] = window['ok'] || {};
   
   // Private members
   
-  var _tracking, _tracked;
+  var _tracking = false;
+  var _track_layers = [];
+  var _layer_dependencies = null;
+  
   var _allBindings = {};    // Bindings by namespace dictionary
   var _dataAttr = 'data-bind';
   
@@ -22,21 +25,23 @@ window['ok'] = window['ok'] || {};
   
   function _startTracking() {
     _tracking = true;
-    _tracked = [];
+    _layer_dependencies = [];
+    _track_layers.push(_layer_dependencies);
   }
   
   // Record a subscribable request
   
   function _track(subscribable) {
-    _tracked.push(subscribable);
+    _layer_dependencies.push(subscribable);
   }
   
   // Stop recording requests and return a list of the unique requests
   
   function _stopTracking() {
-    _tracking = false;
-    _tracked = _.uniq(_tracked);
-    return _tracked;
+    var finished_dependencies = _.uniq(_track_layers.pop());
+    if (_track_layers.length === 0) _tracking = false;
+    _layer_dependencies = _(_track_layers).last();
+    return finished_dependencies;
   }
   
   // Subscribable Mixin
