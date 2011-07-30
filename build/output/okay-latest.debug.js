@@ -277,10 +277,13 @@ window['ok'] = window['ok'] || {};
   var bindings = {};
   
   dom['nodesWithAttr'] = function(attr, containerNode) {
+    var selector = '*[' + attr + ']';
     if (containerNode) {
-      return $(containerNode).find('*[' + attr + ']');
+      var children_matches = $(containerNode).find('*[' + attr + ']');  
+      if ($(containerNode).is(selector)) return $(containerNode).add(children_matches);
+      return children_matches;
     }
-    return $('*[' + attr + ']');
+    return $(selector);
   };
   
   dom['createNode'] = function(html) {
@@ -442,13 +445,25 @@ window['ok'] = window['ok'] || {};
   
 })(ok);(function(ok) {
 
+  function has_touch() {
+    return $.os.ios || $.os.android || $.os.webos || $.os.touchpad || $.os.iphone || $.os.ipad || $.os.blackberry;
+  }
+  
   function TapBinding(node, callback, vm) {
     this.node = node;
     this.callback = callback;
     this.vm = vm;
-    $(node).bind('tap', _.bind(this.activate, this));
-    $(node).bind('touchstart', _.bind(this.btn_down, this));
-    $(node).bind('touchend', _.bind(this.btn_up, this));
+    
+    if (has_touch()) {
+      $(node).bind('tap', _.bind(this.activate, this));
+      $(node).bind('touchstart', _.bind(this.btn_down, this));
+      $(node).bind('touchend', _.bind(this.btn_up, this));
+    }
+    else {
+      $(node).bind('click', _.bind(this.activate, this));
+      $(node).bind('mousedown', _.bind(this.btn_down, this));
+      $(node).bind('mouseup', _.bind(this.btn_up, this));
+    }
   }
   TapBinding.prototype = {
     activate: function(event) {
@@ -561,8 +576,8 @@ window['ok'] = window['ok'] || {};
               
               // This is a new node that needs to be created and inserted at [index]
               new_node = ok.dom.createNode(ok.template.render(templateHtml, data_item));
-              ok.bind(data_item, null, new_node);
               ok.dom.before(current_item.node, new_node);
+              ok.bind(data_item, null, new_node);
               new_items.push({data: data_item, node: new_node});
             }
           }
@@ -571,8 +586,8 @@ window['ok'] = window['ok'] || {};
           
           // We've exhausted our list of existing, bound items so we just need to start adding at the end
           new_node = ok.dom.createNode(ok.template.render(templateHtml, data_item));
-          ok.bind(data_item, null, new_node);
           ok.dom.append(self.node, new_node);
+          ok.bind(data_item, null, new_node);
           new_items.push({data: data_item, node: new_node});
         }
       });

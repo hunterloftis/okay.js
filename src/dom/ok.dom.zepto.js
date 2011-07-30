@@ -5,10 +5,13 @@
   var bindings = {};
   
   dom['nodesWithAttr'] = function(attr, containerNode) {
+    var selector = '*[' + attr + ']';
     if (containerNode) {
-      return $(containerNode).find('*[' + attr + ']');
+      var children_matches = $(containerNode).find('*[' + attr + ']');  
+      if ($(containerNode).is(selector)) return $(containerNode).add(children_matches);
+      return children_matches;
     }
-    return $('*[' + attr + ']');
+    return $(selector);
   };
   
   dom['createNode'] = function(html) {

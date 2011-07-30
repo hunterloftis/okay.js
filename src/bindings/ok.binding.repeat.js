@@ -61,8 +61,8 @@
               
               // This is a new node that needs to be created and inserted at [index]
               new_node = ok.dom.createNode(ok.template.render(templateHtml, data_item));
-              ok.bind(data_item, null, new_node);
               ok.dom.before(current_item.node, new_node);
+              ok.bind(data_item, null, new_node);
               new_items.push({data: data_item, node: new_node});
             }
           }
@@ -71,8 +71,8 @@
           
           // We've exhausted our list of existing, bound items so we just need to start adding at the end
           new_node = ok.dom.createNode(ok.template.render(templateHtml, data_item));
-          ok.bind(data_item, null, new_node);
           ok.dom.append(self.node, new_node);
+          ok.bind(data_item, null, new_node);
           new_items.push({data: data_item, node: new_node});
         }
       });

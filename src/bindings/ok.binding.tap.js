@@ -1,12 +1,24 @@
 (function(ok) {
 
+  function has_touch() {
+    return $.os.ios || $.os.android || $.os.webos || $.os.touchpad || $.os.iphone || $.os.ipad || $.os.blackberry;
+  }
+  
   function TapBinding(node, callback, vm) {
     this.node = node;
     this.callback = callback;
     this.vm = vm;
-    $(node).bind('tap', _.bind(this.activate, this));
-    $(node).bind('touchstart', _.bind(this.btn_down, this));
-    $(node).bind('touchend', _.bind(this.btn_up, this));
+    
+    if (has_touch()) {
+      $(node).bind('tap', _.bind(this.activate, this));
+      $(node).bind('touchstart', _.bind(this.btn_down, this));
+      $(node).bind('touchend', _.bind(this.btn_up, this));
+    }
+    else {
+      $(node).bind('click', _.bind(this.activate, this));
+      $(node).bind('mousedown', _.bind(this.btn_down, this));
+      $(node).bind('mouseup', _.bind(this.btn_up, this));
+    }
   }
   TapBinding.prototype = {
     activate: function(event) {
