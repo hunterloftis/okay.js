@@ -30,8 +30,6 @@
  */
     _update: function(array) {
       
-      if (DEBUGGING) console.log("repeat _update");
-      
       var self = this,
           html = '',
           templateHtml = ok.dom.html(this.templateId);

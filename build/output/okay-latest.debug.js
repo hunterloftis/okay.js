@@ -11,6 +11,7 @@ window['ok'] = window['ok'] || {};
   ok['dom'] = {};
   ok['template'] = {};
   ok['binding'] = {};
+  ok['debug'] = {};
   
   // Private members
   
@@ -20,6 +21,7 @@ window['ok'] = window['ok'] || {};
   
   var _allBindings = {};    // Bindings by namespace dictionary
   var _dataAttr = 'data-bind';
+  var _watchAttr = 'data-watch';
   
   // Begin recording subscribable requests (dependencies)
   
@@ -193,6 +195,7 @@ window['ok'] = window['ok'] || {};
     namespace = namespace || '';
     
     var dataAttr = _dataAttr + (namespace.length > 0 ? '-' + namespace : '');
+    var watchAttr = _watchAttr + (namespace.length > 0 ? '-' + namespace : '');
     
     // Find all elements with a data-bind(-namespace) attribute
     var boundNodes = ok.dom.nodesWithAttr(dataAttr, containerNode),
@@ -208,7 +211,7 @@ window['ok'] = window['ok'] || {};
       }
       
       _.each(bindingObject, function(subscribable, type) {        // register subscribables for each binding
-        var binding = ok.binding[type](node, subscribable, viewModel);
+        var binding = ok.binding[type](node, subscribable, viewModel, false);  // figure out the type of binding (html, value, click, etc) and create the binding
         if (binding instanceof Array) {
           allBindings.concat(binding)
         }
@@ -217,6 +220,31 @@ window['ok'] = window['ok'] || {};
         }
       });
     });
+    
+    // Find all elements with a data-bind(-namespace) attribute
+    var watchNodes = ok.dom.nodesWithAttr(watchAttr, containerNode);
+    
+    _(watchNodes).each(function(node) {
+  
+      var bindingString = ok.dom.attr(node, watchAttr);   // extract the attribute as a string
+      
+      bindingString = 'var bindingObject = {' + bindingString + '}';   // convert the attribute to an object
+      with(viewModel) {
+        eval(bindingString);
+      }
+      
+      _.each(bindingObject, function(subscribable, type) {        // register subscribables for each binding
+        var binding = ok.binding[type](node, subscribable, viewModel, true);  // figure out the type of binding (html, value, click, etc) and create the binding
+        if (binding instanceof Array) {
+          allBindings.concat(binding)
+        }
+        else {
+          allBindings.push(binding);
+        }
+      });
+    });
+    
+    return allBindings;
   };
   
   // Unbinding a namespace from the DOM
@@ -389,13 +417,14 @@ window['ok'] = window['ok'] || {};
   
 })(ok);(function(ok) {
   
-  function HtmlBinding(node, subscribable) {
+  function HtmlBinding(node, subscribable, vm, debounce) {
+    this.update = debounce ? _(this._update).debounce(0) : this._update;
     this.node = node;
     this.subscribable = subscribable;
     ok.safeSubscribe(subscribable, this.update, this);
   }
   HtmlBinding.prototype = {
-    update: function(newValue) {
+    _update: function(newValue) {
       ok.dom.html(this.node, newValue);
     },
     release: function() {
@@ -403,9 +432,11 @@ window['ok'] = window['ok'] || {};
     }
   };
   
-  ok.binding['html'] = function(node, subscribable) {
-    return new HtmlBinding(node, subscribable);
+  ok.binding['html'] = function(node, subscribable, vm, debounce) {
+    return new HtmlBinding(node, subscribable, vm, debounce);
   };
+  
+  ok.debug.HtmlBinding = HtmlBinding;
   
 })(ok);(function(ok) {
 
@@ -574,7 +605,9 @@ window['ok'] = window['ok'] || {};
  *   @param {Object} options as { template: templateId, collection: collection }
  */
 
-  function RepeatBinding(node, options, vm) {
+  function RepeatBinding(node, options, vm, debounce) {
+    
+    this.update = debounce ? _(this._update).debounce(0) : this._update;
     
     this.node = node;
     this.templateId = '#' + options.template;
@@ -593,8 +626,8 @@ window['ok'] = window['ok'] || {};
  *
  *    @param {any} newValue the new value of the subscribable
  */
-    update: function(array) {
-            
+    _update: function(array) {
+      
       var self = this,
           html = '',
           templateHtml = ok.dom.html(this.templateId);
@@ -663,9 +696,11 @@ window['ok'] = window['ok'] || {};
     }
   };
   
-  ok.binding['repeat'] = function(node, subscribable, vm) {
-    return new RepeatBinding(node, subscribable, vm);
+  ok.binding['repeat'] = function(node, subscribable, vm, debounce) {
+    return new RepeatBinding(node, subscribable, vm, debounce);
   };
+  
+  ok.debug.RepeatBinding = RepeatBinding;
   
 })(ok);(function(ok) {
   

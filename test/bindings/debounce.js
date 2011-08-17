@@ -5,8 +5,6 @@ $(document).ready(function() {
   var repeat_renders = 0,
       html_renders = 0;
   
-  DEBUGGING = true;
-  
   // Hijack repeater update
   var repeat_update = ok.debug.RepeatBinding.prototype._update;
   ok.debug.RepeatBinding.prototype._update = function(val) {
