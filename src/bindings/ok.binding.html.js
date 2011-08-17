@@ -1,12 +1,13 @@
 (function(ok) {
   
-  function HtmlBinding(node, subscribable) {
+  function HtmlBinding(node, subscribable, vm, debounce) {
+    this.update = debounce ? _(this._update).debounce(0) : this._update;
     this.node = node;
     this.subscribable = subscribable;
     ok.safeSubscribe(subscribable, this.update, this);
   }
   HtmlBinding.prototype = {
-    update: function(newValue) {
+    _update: function(newValue) {
       ok.dom.html(this.node, newValue);
     },
     release: function() {
@@ -14,8 +15,10 @@
     }
   };
   
-  ok.binding['html'] = function(node, subscribable) {
-    return new HtmlBinding(node, subscribable);
+  ok.binding['html'] = function(node, subscribable, vm, debounce) {
+    return new HtmlBinding(node, subscribable, vm, debounce);
   };
+  
+  ok.debug.HtmlBinding = HtmlBinding;
   
 })(ok);

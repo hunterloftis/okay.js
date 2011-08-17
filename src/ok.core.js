@@ -7,6 +7,7 @@ window['ok'] = window['ok'] || {};
   ok['dom'] = {};
   ok['template'] = {};
   ok['binding'] = {};
+  ok['debug'] = {};
   
   // Private members
   
@@ -16,6 +17,7 @@ window['ok'] = window['ok'] || {};
   
   var _allBindings = {};    // Bindings by namespace dictionary
   var _dataAttr = 'data-bind';
+  var _watchAttr = 'data-watch';
   
   // Begin recording subscribable requests (dependencies)
   
@@ -189,6 +191,7 @@ window['ok'] = window['ok'] || {};
     namespace = namespace || '';
     
     var dataAttr = _dataAttr + (namespace.length > 0 ? '-' + namespace : '');
+    var watchAttr = _watchAttr + (namespace.length > 0 ? '-' + namespace : '');
     
     // Find all elements with a data-bind(-namespace) attribute
     var boundNodes = ok.dom.nodesWithAttr(dataAttr, containerNode),
@@ -204,7 +207,7 @@ window['ok'] = window['ok'] || {};
       }
       
       _.each(bindingObject, function(subscribable, type) {        // register subscribables for each binding
-        var binding = ok.binding[type](node, subscribable, viewModel);
+        var binding = ok.binding[type](node, subscribable, viewModel, false);  // figure out the type of binding (html, value, click, etc) and create the binding
         if (binding instanceof Array) {
           allBindings.concat(binding)
         }
@@ -213,6 +216,31 @@ window['ok'] = window['ok'] || {};
         }
       });
     });
+    
+    // Find all elements with a data-bind(-namespace) attribute
+    var watchNodes = ok.dom.nodesWithAttr(watchAttr, containerNode);
+    
+    _(watchNodes).each(function(node) {
+  
+      var bindingString = ok.dom.attr(node, watchAttr);   // extract the attribute as a string
+      
+      bindingString = 'var bindingObject = {' + bindingString + '}';   // convert the attribute to an object
+      with(viewModel) {
+        eval(bindingString);
+      }
+      
+      _.each(bindingObject, function(subscribable, type) {        // register subscribables for each binding
+        var binding = ok.binding[type](node, subscribable, viewModel, true);  // figure out the type of binding (html, value, click, etc) and create the binding
+        if (binding instanceof Array) {
+          allBindings.concat(binding)
+        }
+        else {
+          allBindings.push(binding);
+        }
+      });
+    });
+    
+    return allBindings;
   };
   
   // Unbinding a namespace from the DOM

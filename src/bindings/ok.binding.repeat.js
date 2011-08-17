@@ -7,7 +7,9 @@
  *   @param {Object} options as { template: templateId, collection: collection }
  */
 
-  function RepeatBinding(node, options, vm) {
+  function RepeatBinding(node, options, vm, debounce) {
+    
+    this.update = debounce ? _(this._update).debounce(0) : this._update;
     
     this.node = node;
     this.templateId = '#' + options.template;
@@ -26,8 +28,10 @@
  *
  *    @param {any} newValue the new value of the subscribable
  */
-    update: function(array) {
-            
+    _update: function(array) {
+      
+      if (DEBUGGING) console.log("repeat _update");
+      
       var self = this,
           html = '',
           templateHtml = ok.dom.html(this.templateId);
@@ -96,8 +100,10 @@
     }
   };
   
-  ok.binding['repeat'] = function(node, subscribable, vm) {
-    return new RepeatBinding(node, subscribable, vm);
+  ok.binding['repeat'] = function(node, subscribable, vm, debounce) {
+    return new RepeatBinding(node, subscribable, vm, debounce);
   };
+  
+  ok.debug.RepeatBinding = RepeatBinding;
   
 })(ok);
