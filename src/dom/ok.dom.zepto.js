@@ -70,4 +70,16 @@
     $(node).unbind(event, handler);
   }
   
+  dom['attribute'] = function(node, attr, setter) {
+    return $(node).attr(attr, setter);
+  };
+  
+  dom['removeAttribute'] = function(node, attr) {
+    $(node).removeAttr(attr);
+  };
+  
+  dom['is'] = function(node, filter) {
+    return $(node).is(filter);
+  };
+  
 })(window['ok'], window['Zepto']);

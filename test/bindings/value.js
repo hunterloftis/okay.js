@@ -44,5 +44,43 @@ $(document).ready(function() {
     
     strictEqual(valueVM.testValue(), 'written', 'input box edits change the vm values on blur');
   });
+
+  test("checkboxes", function() {
+    expect(5);
+    
+    var input = $('#valueCheck');
+    
+    var valueVM = {
+      toggle: ok.base(true)
+    };
+    
+    strictEqual(input.is(':checked'), false, 'checkbox is initially false');
+    
+    ok.bind(valueVM, 'check');
+    
+    strictEqual(input.is(':checked'), true, 'checkbox should be checked after binding.');
+    
+    valueVM.toggle(false);
+    
+    strictEqual(input.is(':checked'), false, 'checkbox should be unchecked after VM change.');
+    
+    input.attr('checked', 'checked');
+    input.trigger('change');
+    
+    stop();
+    setTimeout(function() {
+      strictEqual(valueVM.toggle(), true, 'VM should be true after checkbox click.');
+      input.removeAttr('checked');
+      input.trigger('change');
+      start();
+    }, 1);
+    
+    stop();
+    setTimeout(function() {
+      strictEqual(valueVM.toggle(), false, 'VM should be false after another checkbox click.');
+      start();
+    }, 10);
+    
+  });
   
 });
