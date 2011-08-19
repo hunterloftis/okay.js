@@ -114,6 +114,30 @@ $(document).ready(function() {
     return time;
   }
   
+  test("adding new items to bound repeaters", function() {
+    
+    var renderVM = {
+      items: ok.collection([])
+    };
+  
+    html_renders = 0;
+    
+    ok.bind(renderVM, 'dbrender');
+    
+    strictEqual(html_renders, 0, 'Renders should be 0 before adding items.');
+    
+    // Add initial items
+    var last = new Base(1);
+    renderVM.items.push(last);
+    for(var i = 0; i < 9; i++) {
+      last = new Incrementor(last);
+      renderVM.items.push(last);
+    }
+    
+    strictEqual(html_renders, 0, 'Renders should be 0 after adding items.');
+    
+  });
+  
   test("speed test", function() {
 
     var item_count = 256;
