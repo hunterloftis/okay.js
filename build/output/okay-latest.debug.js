@@ -192,6 +192,7 @@ window['ok'] = window['ok'] || {};
   // Binding a namespace to the DOM
   
   ok['bind'] = function(viewModel, namespace, containerNode) {
+    
     namespace = namespace || '';
     
     var dataAttr = _dataAttr + (namespace.length > 0 ? '-' + namespace : '');
@@ -266,12 +267,15 @@ window['ok'] = window['ok'] || {};
   // Safe way for bindings to subscribe
   
   ok['safeSubscribe'] = function(mystery, fn, context) {
-    if (mystery.subscribe) {
-      mystery.subscribe(fn, context);
-      fn.call(context, mystery());
-      return;
+    if (mystery) {
+      if (mystery.subscribe) {
+        mystery.subscribe(fn, context);
+        fn.call(context, mystery());
+        return;
+      }
+      return fn.call(context, mystery);    // Just send value straightaway
     }
-    fn.call(context, mystery);    // Just send value straightaway
+    return;   // TODO: Place some sort of notification here that your binding wasn't made
   };
   
 })(window['ok'], window['_']);(function(ok, _) {
@@ -421,6 +425,7 @@ window['ok'] = window['ok'] || {};
     this.update = debounce ? _(this._update).debounce(0) : this._update;
     this.node = node;
     this.subscribable = subscribable;
+    console.dir(subscribable);
     ok.safeSubscribe(subscribable, this.update, this);
   }
   HtmlBinding.prototype = {
@@ -598,6 +603,8 @@ window['ok'] = window['ok'] || {};
   
 })(ok);(function(ok) {
   
+  var all_templates = {};
+  
 /**
  *   Binds a DOM node to an Okay.JS collection for template writing
  *
@@ -630,8 +637,11 @@ window['ok'] = window['ok'] || {};
       
       var self = this,
           html = '',
-          templateHtml = ok.dom.html(this.templateId),
-          compiledTemplate = _.template(templateHtml);
+          compiledTemplate;
+          
+      if (typeof all_templates[this.templateId] === 'undefined') all_templates[this.templateId] = _.template(ok.dom.html(this.templateId));
+      
+      compiledTemplate = all_templates[this.templateId];
       
       var current_data_array = _(this._items).pluck('data'),
           current_item,
@@ -661,7 +671,7 @@ window['ok'] = window['ok'] || {};
             else {
               
               // This is a new node that needs to be created and inserted at [index]
-              new_node = ok.dom.createNode(compiledTemplate(templateHtml, data_item));
+              new_node = ok.dom.createNode(compiledTemplate(data_item));
               ok.dom.before(current_item.node, new_node);
               ok.bind(data_item, null, new_node);
               new_items.push({data: data_item, node: new_node});
@@ -671,7 +681,7 @@ window['ok'] = window['ok'] || {};
         else {
           
           // We've exhausted our list of existing, bound items so we just need to start adding at the end
-          new_node = ok.dom.createNode(compiledTemplate(templateHtml, data_item));
+          new_node = ok.dom.createNode(compiledTemplate(data_item));
           ok.dom.append(self.node, new_node);
           ok.bind(data_item, null, new_node);
           new_items.push({data: data_item, node: new_node});
@@ -725,6 +735,31 @@ window['ok'] = window['ok'] || {};
     var bindings = [];
     for (var className in classes) {
       bindings.push(new CssBinding(node, className, classes[className]));  
+    };
+    return bindings;
+  };
+  
+})(ok);(function(ok) {
+  
+  function AttrBinding(node, attrName, subscribable) {
+    this.node = node;
+    this.attrName = attrName;
+    this.subscribable = subscribable;
+    ok.safeSubscribe(subscribable, this.update, this);
+  }
+  AttrBinding.prototype = {
+    update: function(newValue) {
+      $(this.node).attr(this.attrName, newValue);
+    },
+    release: function() {
+      this.subscribable.unsubscribe(this.update);
+    }
+  };
+  
+  ok.binding['attr'] = function(node, attributes, vm) {
+    var bindings = [];
+    for (var attrName in attributes) {
+      bindings.push(new AttrBinding(node, attrName, attributes[attrName]));  
     };
     return bindings;
   };

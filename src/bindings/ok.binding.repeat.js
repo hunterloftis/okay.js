@@ -68,7 +68,7 @@
             else {
               
               // This is a new node that needs to be created and inserted at [index]
-              new_node = ok.dom.createNode(compiledTemplate(templateHtml, data_item));
+              new_node = ok.dom.createNode(compiledTemplate(data_item));
               ok.dom.before(current_item.node, new_node);
               ok.bind(data_item, null, new_node);
               new_items.push({data: data_item, node: new_node});
@@ -78,7 +78,7 @@
         else {
           
           // We've exhausted our list of existing, bound items so we just need to start adding at the end
-          new_node = ok.dom.createNode(compiledTemplate(templateHtml, data_item));
+          new_node = ok.dom.createNode(compiledTemplate(data_item));
           ok.dom.append(self.node, new_node);
           ok.bind(data_item, null, new_node);
           new_items.push({data: data_item, node: new_node});

@@ -188,6 +188,7 @@ window['ok'] = window['ok'] || {};
   // Binding a namespace to the DOM
   
   ok['bind'] = function(viewModel, namespace, containerNode) {
+    
     namespace = namespace || '';
     
     var dataAttr = _dataAttr + (namespace.length > 0 ? '-' + namespace : '');
@@ -262,12 +263,15 @@ window['ok'] = window['ok'] || {};
   // Safe way for bindings to subscribe
   
   ok['safeSubscribe'] = function(mystery, fn, context) {
-    if (mystery.subscribe) {
-      mystery.subscribe(fn, context);
-      fn.call(context, mystery());
-      return;
+    if (mystery) {
+      if (mystery.subscribe) {
+        mystery.subscribe(fn, context);
+        fn.call(context, mystery());
+        return;
+      }
+      return fn.call(context, mystery);    // Just send value straightaway
     }
-    fn.call(context, mystery);    // Just send value straightaway
+    return;   // TODO: Place some sort of notification here that your binding wasn't made
   };
   
 })(window['ok'], window['_']);

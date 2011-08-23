@@ -10,3 +10,4 @@ src/bindings/ok.binding.tap.js
 src/bindings/ok.binding.value.js
 src/bindings/ok.binding.repeat.js
 src/bindings/ok.binding.css.js
+src/bindings/ok.binding.attr.js
