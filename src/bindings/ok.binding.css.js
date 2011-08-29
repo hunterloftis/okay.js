@@ -4,7 +4,7 @@
     this.node = node;
     this.className = className;
     this.subscribable = subscribable;
-    ok.safeSubscribe(subscribable, this.update, this);
+    this.subscription = ok.safeSubscribe(subscribable, this.update, this);
   }
   CssBinding.prototype = {
     update: function(newValue) {
@@ -12,7 +12,7 @@
       else $(this.node).removeClass(this.className);
     },
     release: function() {
-      this.subscribable.unsubscribe(this.update);
+      this.subscribable.unsubscribe(this.subscription);
     }
   };
   

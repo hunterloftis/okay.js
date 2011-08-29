@@ -24,8 +24,8 @@ $(document).ready(function() {
     
     viewModel.testVisible(true);
     
-    strictEqual($('#testVisible').css('display'), 'block', 'base value binding autoupdates');
-    strictEqual($('#testHtml').html(), 'visible', 'dependent value binding autoupdates');
+    strictEqual($('#testVisible').css('display'), 'block', 'display property should update to "block" when bound base value updates');
+    strictEqual($('#testHtml').html(), 'visible', 'html property should be "visible" after bound dependent autoupdates');
     
     ok.unbind();
 

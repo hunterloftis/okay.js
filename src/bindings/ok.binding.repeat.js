@@ -20,7 +20,7 @@
     this._items = [];   // {node: domNode, data: array element}
     
     ok.dom.html(this.node, '');
-    ok.safeSubscribe(this.subscribable, this.update, this);
+    this.subscription = ok.safeSubscribe(this.subscribable, this.update, this);
   }
   
   RepeatBinding.prototype = {
@@ -100,7 +100,7 @@
     },
     
     release: function() {
-      this.subscribable.unsubscribe(this.update);
+      this.subscribable.unsubscribe(this.subscription);
     }
   };
   

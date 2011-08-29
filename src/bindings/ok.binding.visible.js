@@ -3,7 +3,7 @@
   function VisibleBinding(node, subscribable) {
     this.node = node;
     this.subscribable = subscribable;
-    ok.safeSubscribe(subscribable, this.update, this);
+    this.subscription = ok.safeSubscribe(subscribable, this.update, this);
   }
   VisibleBinding.prototype = {
     update: function(newValue) {
@@ -15,7 +15,7 @@
       }
     },
     release: function() {
-      this.subscribable.unsubscribe(this.update);
+      this.subscribable.unsubscribe(this.subscription);
     }
   };
   

@@ -53,60 +53,62 @@ window['ok'] = window['ok'] || {};
   
   // Subscribable Mixin
   
-  var subscribable = {
-    subscribe: function(callback, context) {
-      if (_(this._subscriptions).any(function(s) {                // TODO: Make this faster/more efficient
-        return s.callback === callback && s.context === context;
-      })) return;
-      ok.debug.SUBSCRIPTION_COUNT++;
-      var subscription = {
-        callback: callback,
-        context: context || this
-      };
-      this._subscriptions.push(subscription);
-      callback._publishers = callback._publishers || [];
-      if (!_(callback._publishers).contains(this)) {
-        callback._publishers.push(this);
-      }
-    },
-    publish: function(val) {
-      _(this._subscriptions).each(function(subscription) {
-        subscription.callback.call(subscription.context, val);
-      }, this);
-    },
-    unsubscribe: function(callback) {
-      ok.debug.SUBSCRIPTION_COUNT--;
-      /*
-      this._subscriptions = _(this._subscriptions).reject(function(subscription) {
-        return (subscription.callback === callback);
-      });
-      callback._publishers = _(callback._publishers).without(this);
-      */
-      var i;
-      i = this._subscriptions.length
-      while(i--) {
-        if (this._subscriptions[i].callback === callback) {
-          this._subscriptions[i].splice(i, 1);
-          i = -1;
-        }
-      }
-      i = callback._publishers.length
-      while(i--) {
-        if (callback._publishers[i] === this) {
-          callback._publishers.splice(i, 1);
-          i = -1;
-        }
-      }
-    }
-  };
+  var _next_subscriber_hash = 1;
+  function next_subscriber_hash() { return _next_subscriber_hash++; }
   
   function _makeSubscribable(object) {
-    object._subscriptions = [];
     object['subscribe'] = subscribable.subscribe;
     object['publish'] = subscribable.publish;
     object['unsubscribe'] = subscribable.unsubscribe;
-    object.__isSubscribable = true;
+    object._publishesToHash = {};
+    object._subscribesTo = {};
+    object._isSubscribable = true;
+    object._subscriber_hash = next_subscriber_hash();
   }
+  
+  var subscribable = {
+    
+    // Adds a callback function to the list of listeners for this subscribable
+    subscribe: function(callback) {
+      
+      // All subscriber callbacks must be identified by a hash
+      var hash = callback._subscriber_hash = callback._subscriber_hash || next_subscriber_hash();
+
+      // Don't re-subscribe to something we've already got
+      if (this._publishesToHash[hash]) return;
+      
+      // Add this callback to this subscriber's list of listeners
+      this._publishesToHash[hash] = callback;
+      
+      ok.debug.SUBSCRIPTION_COUNT++;
+    
+      // All subscribers must keep a list of the subscribables they listen to
+      callback._subscribesTo = callback._subscribesTo || {};
+      callback._subscribesTo[this._subscriber_hash] = this;
+    },
+    
+    // Publishes a value to all listeners of this subscribable
+    publish: function(val) {
+      _(this._publishesToHash).each(function(listener) {
+        listener(val);
+      }, this);
+    },
+    
+    unsubscribe: function(callback) {
+      
+      ok.debug.SUBSCRIPTION_COUNT--;
+      
+      // TODO: Consider changing this to a slower (but safer) (callback._subscriber_hash && callback._subscribesTo[this._subscriber_hash])
+      if (true) {
+        // Remove this from the callback's list of subscribables
+        delete callback._subscribesTo[this._subscriber_hash];
+        
+        // Remove the callback from this subscriber's list of listeners
+        delete this._publishesToHash[callback._subscriber_hash];
+      }
+      
+    }
+  };
   
   // Bases
   
@@ -206,15 +208,18 @@ window['ok'] = window['ok'] || {};
 
     _makeSubscribable(dependent);
     
+    /*
     function _update() {
       //update_queue.push(_process_update);
       _process_update();
     }
+    */
     
-    function _process_update(callback) {
+    function _update() {
+      
       ok.debug.UPDATE_COUNT++;
-      var boundDependencies = _update._publishers ? _update._publishers.slice() : [],
-          trackedDependencies;
+      
+      var boundDependencies = _update._subscribesTo, trackedDependencies;
       
       _startTracking(); // Start tracking which bases, collections, and dependents this dependent depends on
       
@@ -223,39 +228,24 @@ window['ok'] = window['ok'] || {};
       
       trackedDependencies = _stopTracking();  // Stop tracking
       
-      // TODO: Make this configurable (so you can turn off live dependecy tracking)
-      //      That would increase the speed of dependents (esp. for mobile)
+      var i;
       
-      /*
-      var unbindFrom = _(boundDependencies).select(function(dependency) {   // Find expired dependencies
-        return !_(trackedDependencies).contains(dependency);
-      });
+      i = boundDependencies.length;
+      while(i--) {
+        boundDependencies[i].unsubscribe(_update);
+      }
       
-      var bindTo = _(trackedDependencies).select(function(dependency) {   // Find new dependencies
-        return !_(boundDependencies).contains(dependency);
-      });
-      
-      _(unbindFrom).each(function(subscribable) {   // Unbind expired dependencies
-        subscribable.unsubscribe(_update);
-      });
-    
-      _(bindTo).each(function(subscribable) {   // Bind new dependencies
-        subscribable.subscribe(_update);
-      });
-      */
-      
-      _(boundDependencies).each(function(dependency) {
-        dependency.unsubscribe(_update);
-      });
-      
-      _(trackedDependencies).each(function(dependency) {
-        dependency.subscribe(_update);
-      });
+      i = trackedDependencies.length;
+      while(i--) {
+        trackedDependencies[i].subscribe(_update);
+      }
       
       if (_currentValue !== _oldValue) dependent.publish(_currentValue);   // Publish an update for subscribers
       
-      return callback && callback(undefined);
+      return;
     }
+    
+    _makeSubscribable(_update);
     
     _update();
     return dependent;
@@ -346,13 +336,15 @@ window['ok'] = window['ok'] || {};
   // Safe way for bindings to subscribe
   
   ok['safeSubscribe'] = function(mystery, fn, context) {
+    fn = _(fn).bind(context);
     if (mystery) {
       if (mystery.subscribe) {
-        mystery.subscribe(fn, context);
-        fn.call(context, mystery());
-        return;
+        mystery.subscribe(fn);
+        fn(mystery());
+        return fn;
       }
-      return fn.call(context, mystery);    // Just send value straightaway
+      fn(mystery);    // Just send value straightaway
+      return fn;
     }
     return;   // TODO: Place some sort of notification here that your binding wasn't made
   };
@@ -478,7 +470,7 @@ window['ok'] = window['ok'] || {};
   function VisibleBinding(node, subscribable) {
     this.node = node;
     this.subscribable = subscribable;
-    ok.safeSubscribe(subscribable, this.update, this);
+    this.subscription = ok.safeSubscribe(subscribable, this.update, this);
   }
   VisibleBinding.prototype = {
     update: function(newValue) {
@@ -490,7 +482,7 @@ window['ok'] = window['ok'] || {};
       }
     },
     release: function() {
-      this.subscribable.unsubscribe(this.update);
+      this.subscribable.unsubscribe(this.subscription);
     }
   };
   
@@ -504,14 +496,14 @@ window['ok'] = window['ok'] || {};
     this.update = debounce ? _(this._update).debounce(0) : this._update;
     this.node = node;
     this.subscribable = subscribable;
-    ok.safeSubscribe(subscribable, this.update, this);
+    this.subscription = ok.safeSubscribe(subscribable, this.update, this);
   }
   HtmlBinding.prototype = {
     _update: function(newValue) {
       ok.dom.html(this.node, newValue);
     },
     release: function() {
-      this.subscribable.unsubscribe(this.update);
+      this.subscribable.unsubscribe(this.subscription);
     }
   };
   
@@ -618,7 +610,8 @@ window['ok'] = window['ok'] || {};
   function TextValueBinding(node, subscribable) {
     this.node = node;
     this.subscribable = subscribable;
-    subscribable.subscribe(this.updateNode, this);
+    _(this).bindAll(['updateNode']);            // TODO less kludgy context system
+    subscribable.subscribe(this.updateNode);
     this.updateNode(subscribable());
     this.bindNode(node);
   }
@@ -641,7 +634,8 @@ window['ok'] = window['ok'] || {};
   function CheckValueBinding(node, subscribable) {
     this.node = node;
     this.subscribable = subscribable;
-    subscribable.subscribe(this.updateNode, this);
+    _(this).bindAll(['updateNode']);          // TODO Figure out a better way to convey context in bindings
+    subscribable.subscribe(this.updateNode);
     this.updateNode(subscribable());
     this.bindNode(node);
   }
@@ -699,7 +693,7 @@ window['ok'] = window['ok'] || {};
     this._items = [];   // {node: domNode, data: array element}
     
     ok.dom.html(this.node, '');
-    ok.safeSubscribe(this.subscribable, this.update, this);
+    this.subscription = ok.safeSubscribe(this.subscribable, this.update, this);
   }
   
   RepeatBinding.prototype = {
@@ -779,7 +773,7 @@ window['ok'] = window['ok'] || {};
     },
     
     release: function() {
-      this.subscribable.unsubscribe(this.update);
+      this.subscribable.unsubscribe(this.subscription);
     }
   };
   
@@ -795,7 +789,7 @@ window['ok'] = window['ok'] || {};
     this.node = node;
     this.className = className;
     this.subscribable = subscribable;
-    ok.safeSubscribe(subscribable, this.update, this);
+    this.subscription = ok.safeSubscribe(subscribable, this.update, this);
   }
   CssBinding.prototype = {
     update: function(newValue) {
@@ -803,7 +797,7 @@ window['ok'] = window['ok'] || {};
       else $(this.node).removeClass(this.className);
     },
     release: function() {
-      this.subscribable.unsubscribe(this.update);
+      this.subscribable.unsubscribe(this.subscription);
     }
   };
   
@@ -821,14 +815,14 @@ window['ok'] = window['ok'] || {};
     this.node = node;
     this.attrName = attrName;
     this.subscribable = subscribable;
-    ok.safeSubscribe(subscribable, this.update, this);
+    this.subscription = ok.safeSubscribe(subscribable, this.update, this);
   }
   AttrBinding.prototype = {
     update: function(newValue) {
       $(this.node).attr(this.attrName, newValue);
     },
     release: function() {
-      this.subscribable.unsubscribe(this.update);
+      this.subscribable.unsubscribe(this.subscription);
     }
   };
   

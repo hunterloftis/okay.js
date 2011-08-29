@@ -4,14 +4,14 @@
     this.update = debounce ? _(this._update).debounce(0) : this._update;
     this.node = node;
     this.subscribable = subscribable;
-    ok.safeSubscribe(subscribable, this.update, this);
+    this.subscription = ok.safeSubscribe(subscribable, this.update, this);
   }
   HtmlBinding.prototype = {
     _update: function(newValue) {
       ok.dom.html(this.node, newValue);
     },
     release: function() {
-      this.subscribable.unsubscribe(this.update);
+      this.subscribable.unsubscribe(this.subscription);
     }
   };
   

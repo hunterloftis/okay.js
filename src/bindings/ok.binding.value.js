@@ -3,7 +3,8 @@
   function TextValueBinding(node, subscribable) {
     this.node = node;
     this.subscribable = subscribable;
-    subscribable.subscribe(this.updateNode, this);
+    _(this).bindAll(['updateNode']);            // TODO less kludgy context system
+    subscribable.subscribe(this.updateNode);
     this.updateNode(subscribable());
     this.bindNode(node);
   }
@@ -26,7 +27,8 @@
   function CheckValueBinding(node, subscribable) {
     this.node = node;
     this.subscribable = subscribable;
-    subscribable.subscribe(this.updateNode, this);
+    _(this).bindAll(['updateNode']);          // TODO Figure out a better way to convey context in bindings
+    subscribable.subscribe(this.updateNode);
     this.updateNode(subscribable());
     this.bindNode(node);
   }

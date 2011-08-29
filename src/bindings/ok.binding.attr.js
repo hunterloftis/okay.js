@@ -4,14 +4,14 @@
     this.node = node;
     this.attrName = attrName;
     this.subscribable = subscribable;
-    ok.safeSubscribe(subscribable, this.update, this);
+    this.subscription = ok.safeSubscribe(subscribable, this.update, this);
   }
   AttrBinding.prototype = {
     update: function(newValue) {
       $(this.node).attr(this.attrName, newValue);
     },
     release: function() {
-      this.subscribable.unsubscribe(this.update);
+      this.subscribable.unsubscribe(this.subscription);
     }
   };
   
