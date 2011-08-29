@@ -138,6 +138,8 @@ $(document).ready(function() {
     
   });
   
+  return;
+
   test("speed test", function() {
 
     var item_count = 256;

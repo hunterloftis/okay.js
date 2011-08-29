@@ -4,7 +4,6 @@
     this.update = debounce ? _(this._update).debounce(0) : this._update;
     this.node = node;
     this.subscribable = subscribable;
-    console.dir(subscribable);
     ok.safeSubscribe(subscribable, this.update, this);
   }
   HtmlBinding.prototype = {

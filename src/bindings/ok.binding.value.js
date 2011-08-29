@@ -44,8 +44,6 @@
     },
     updateSubscribable: function(event) {
       var val = (ok.dom.is(this.node, ':checked') !== false);
-      console.log("UPDATING WITH VALUE " + val);
-      console.log("(" + ok.dom.is(this.node, ':checked') + ")");
       this.subscribable(val);
     },
     release: function() {

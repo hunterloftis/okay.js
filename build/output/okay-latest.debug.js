@@ -13,6 +13,11 @@ window['ok'] = window['ok'] || {};
   ok['binding'] = {};
   ok['debug'] = {};
   
+  // Debug
+  
+  ok.debug.SUBSCRIPTION_COUNT = 0;
+  ok.debug.UPDATE_COUNT = 0;
+  
   // Private members
   
   var _tracking = false;
@@ -50,11 +55,15 @@ window['ok'] = window['ok'] || {};
   
   var subscribable = {
     subscribe: function(callback, context) {
+      if (_(this._subscriptions).any(function(s) {                // TODO: Make this faster/more efficient
+        return s.callback === callback && s.context === context;
+      })) return;
+      ok.debug.SUBSCRIPTION_COUNT++;
       var subscription = {
         callback: callback,
         context: context || this
       };
-      this._subscriptions.push(subscription);             // TODO: Check that it doesn't already exist in _subscriptions
+      this._subscriptions.push(subscription);
       callback._publishers = callback._publishers || [];
       if (!_(callback._publishers).contains(this)) {
         callback._publishers.push(this);
@@ -66,10 +75,28 @@ window['ok'] = window['ok'] || {};
       }, this);
     },
     unsubscribe: function(callback) {
+      ok.debug.SUBSCRIPTION_COUNT--;
+      /*
       this._subscriptions = _(this._subscriptions).reject(function(subscription) {
         return (subscription.callback === callback);
       });
       callback._publishers = _(callback._publishers).without(this);
+      */
+      var i;
+      i = this._subscriptions.length
+      while(i--) {
+        if (this._subscriptions[i].callback === callback) {
+          this._subscriptions[i].splice(i, 1);
+          i = -1;
+        }
+      }
+      i = callback._publishers.length
+      while(i--) {
+        if (callback._publishers[i] === this) {
+          callback._publishers.splice(i, 1);
+          i = -1;
+        }
+      }
     }
   };
   
@@ -134,6 +161,39 @@ window['ok'] = window['ok'] || {};
     return collection;
   }
   
+  // Update Queue
+  
+  function UpdateQueue() {
+    this.functions = [];
+    this.running = false;
+  }
+  UpdateQueue.prototype = {
+    push: function(fn) {
+      if (_(this.functions).indexOf(fn) !== -1) return; // Abort the push if this function is already queued up
+      this.functions.push(fn);
+      if (!this.running) this.run();
+    },
+    run: function() {
+      this.running = true;
+      var remaining = this.functions.length;
+      var process = remaining > 3 ? 3 : remaining;
+      
+      while(process--) {
+        
+      }
+      var fn = this.functions.shift();
+      if (fn) fn(this.complete);
+      else this.running = false;
+    },
+    complete: function(err, result) {
+      setTimeout(function() {
+        update_queue.run();   // TODO: Figure out why self won't work here
+      }, 1);
+    }
+  };
+  
+  var update_queue = new UpdateQueue();
+  
   // Dependents
   
   ok['dependent'] = function(func, context) {
@@ -146,12 +206,19 @@ window['ok'] = window['ok'] || {};
 
     _makeSubscribable(dependent);
     
-    function _update() {    
+    function _update() {
+      //update_queue.push(_process_update);
+      _process_update();
+    }
+    
+    function _process_update(callback) {
+      ok.debug.UPDATE_COUNT++;
       var boundDependencies = _update._publishers ? _update._publishers.slice() : [],
           trackedDependencies;
       
       _startTracking(); // Start tracking which bases, collections, and dependents this dependent depends on
       
+      var _oldValue = _currentValue;
       _currentValue = func.call(context); // Run the function
       
       trackedDependencies = _stopTracking();  // Stop tracking
@@ -159,6 +226,7 @@ window['ok'] = window['ok'] || {};
       // TODO: Make this configurable (so you can turn off live dependecy tracking)
       //      That would increase the speed of dependents (esp. for mobile)
       
+      /*
       var unbindFrom = _(boundDependencies).select(function(dependency) {   // Find expired dependencies
         return !_(trackedDependencies).contains(dependency);
       });
@@ -174,8 +242,19 @@ window['ok'] = window['ok'] || {};
       _(bindTo).each(function(subscribable) {   // Bind new dependencies
         subscribable.subscribe(_update);
       });
+      */
       
-      dependent.publish(_currentValue);   // Publish an update for subscribers
+      _(boundDependencies).each(function(dependency) {
+        dependency.unsubscribe(_update);
+      });
+      
+      _(trackedDependencies).each(function(dependency) {
+        dependency.subscribe(_update);
+      });
+      
+      if (_currentValue !== _oldValue) dependent.publish(_currentValue);   // Publish an update for subscribers
+      
+      return callback && callback(undefined);
     }
     
     _update();
@@ -425,7 +504,6 @@ window['ok'] = window['ok'] || {};
     this.update = debounce ? _(this._update).debounce(0) : this._update;
     this.node = node;
     this.subscribable = subscribable;
-    console.dir(subscribable);
     ok.safeSubscribe(subscribable, this.update, this);
   }
   HtmlBinding.prototype = {
@@ -581,8 +659,6 @@ window['ok'] = window['ok'] || {};
     },
     updateSubscribable: function(event) {
       var val = (ok.dom.is(this.node, ':checked') !== false);
-      console.log("UPDATING WITH VALUE " + val);
-      console.log("(" + ok.dom.is(this.node, ':checked') + ")");
       this.subscribable(val);
     },
     release: function() {
