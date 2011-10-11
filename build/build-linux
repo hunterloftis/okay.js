@@ -2,24 +2,38 @@
 
 mkdir -p output
 
-OutDebugFile='output/okay-latest.debug.js'
-OutMinFile='output/okay-latest.js'
+OutDebugFileBrowser='output/okay-latest.debug.js'
+
+OutMinFileBrowser='output/okay-latest.js'
+
+OutFileNode='output/okay-latest.node.js'
 
 # Combine the source files
-SourceFiles=`grep js < source-references | # Find JS references 
+SourceFilesCore=`grep js < source-references-core | # Find JS references 
+             sed -e 's/.*/..\/&/' |           # Fix the paths by prefixing with ../
+             tr '\n' ' '`                     # Combine into single line
+
+SourceFilesDom=`grep js < source-references-core | # Find JS references 
              sed -e 's/.*/..\/&/' |           # Fix the paths by prefixing with ../
              tr '\n' ' '`                     # Combine into single line
              
-cat $SourceFiles                    > $OutDebugFile.temp
+# Build for node
+cp ../src/ok.version.js $OutFileNode
+cat $SourceFilesCore  >> $OutFileNode
+
+# Build for browser...
+
+cat $SourceFilesCore  > $OutDebugFileBrowser.temp
+cat $SourceFilesDom   >> $OutDebugFileBrowser.temp
 
 # Now call Google Closure Compiler to produce a minified version
-curl -d output_info=compiled_code -d output_format=text -d compilation_level=SIMPLE_OPTIMIZATIONS --data-urlencode js_code@$OutDebugFile.temp "http://closure-compiler.appspot.com/compile" > $OutMinFile.temp
+curl -d output_info=compiled_code -d output_format=text -d compilation_level=SIMPLE_OPTIMIZATIONS --data-urlencode js_code@$OutDebugFileBrowser.temp "http://closure-compiler.appspot.com/compile" > $OutMinFileBrowser.temp
 
-cp ../src/ok.version.js $OutDebugFile
-cp ../src/ok.version.js $OutMinFile
+cp ../src/ok.version.js $OutDebugFileBrowser
+cp ../src/ok.version.js $OutMinFileBrowser
 
-cat $OutDebugFile.temp >> $OutDebugFile
-cat $OutMinFile.temp >> $OutMinFile
+cat $OutDebugFile.temp >> $OutDebugFileBrowser
+cat $OutMinFile.temp >> $OutMinFileBrowser
 
-rm $OutDebugFile.temp
-rm $OutMinFile.temp
+rm $OutDebugFileBrowser.temp
+rm $OutMinFileBrowser.temp

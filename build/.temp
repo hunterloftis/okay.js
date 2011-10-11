@@ -1,7 +1,3 @@
-// Okay.JS
-// by Hunter Loftis <hunter@hunterloftis.com>
-//
-// Version 0.1.0
 window.ok=window.ok||{};
 (function(c,h){var k,f,e;function g(a){a.subscribe=k;a.publish=f;a.unsubscribe=e;a._publishesToHash={};a._subscribesTo={};a._isSubscribable=true;a._subscriber_hash=q++}function i(){this.functions=[];this.running=false}c.dom={};c.template={};c.binding={};c.debug={};c.debug.SUBSCRIPTION_COUNT=0;c.debug.UPDATE_COUNT=0;var n=false,o=[],l=null,p={},q=1;k=function(a){var b=a._subscriber_hash=a._subscriber_hash||q++;if(!this._publishesToHash[b])this._publishesToHash[b]=a,c.debug.SUBSCRIPTION_COUNT++,a._subscribesTo=
 a._subscribesTo||{},a._subscribesTo[this._subscriber_hash]=this};f=function(a){h(this._publishesToHash).each(function(b){b(a)},this)};e=function(a){c.debug.SUBSCRIPTION_COUNT--;delete a._subscribesTo[this._subscriber_hash];delete this._publishesToHash[a._subscriber_hash]};c.base=function(a){function b(){if(arguments.length>0)return c!==arguments[0]&&(c=arguments[0],b.publish(c)),this;n&&l.push(b);return c}var c=a;g(b);return b};c.collection=function(a){function b(){if(arguments.length>0)return d=

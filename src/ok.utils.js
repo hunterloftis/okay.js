@@ -1,19 +1,25 @@
-(function(ok, _) {
+(function(exports, _) {
   
+  var ok = exports.ok;
+
   var utils = ok.utils = {};
-  
-  utils.toJSON = function toJSON(object) {
+
+  utils.toJSON = function toJSON(object, level) {
+    if (typeof(level) === 'undefined') level = 0;
+    level++;
+    if (level > 5) return undefined;
     if (typeof(object) === 'function') {
-      if (object.__isSubscribable) {
-        return toJSON(object());
+      if (object._isSubscribable) {
+        return toJSON(object(), level);
       }
     }
     else if (typeof(object) === 'object') {
       var obj;
       if (object instanceof Array) obj = [];
       else obj = {};
+      var i = 0;
       for (var key in object) {
-        obj[key] = toJSON(object[key]);
+        obj[key] = toJSON(object[key], level);
       }
       return obj;
     }
@@ -22,4 +28,4 @@
     }
   };
   
-})(ok, _);
+})(typeof exports === 'undefined' ? this : exports, _);

@@ -1,5 +1,3 @@
-src/ok.core.js
-src/ok.utils.js
 src/dom/ok.dom.zepto.js
 src/template/ok.template.underscore.js
 src/bindings/ok.binding.visible.js
@@ -11,3 +9,4 @@ src/bindings/ok.binding.value.js
 src/bindings/ok.binding.repeat.js
 src/bindings/ok.binding.css.js
 src/bindings/ok.binding.attr.js
+src/bindings/ok.binding.init.js

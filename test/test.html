@@ -24,7 +24,8 @@
   <script src="../src/bindings/ok.binding.value.js"></script>
   <script src="../src/bindings/ok.binding.repeat.js"></script>
   <script src="../src/bindings/ok.binding.css.js"></script>
-  
+  <script src="../src/bindings/ok.binding.init.js"></script>
+
   <!-- Tests -->
   
   <script>
@@ -40,6 +41,7 @@
   <script type="text/javascript" src="bindings/value.js"></script>
   <script type="text/javascript" src="bindings/repeat.js"></script>
   <script type="text/javascript" src="bindings/css.js"></script>
+  <script type="text/javascript" src="bindings/init.js"></script>
   <!-- <script type="text/javascript" src="bindings/debounce.js"></script> -->
   
 </head>
@@ -74,6 +76,8 @@
   <ul id='speedBind' data-bind-bindSpeed='repeat: { template: "debounceTemplate", collection: items }'></ul>
   <ul id='speedWatch' data-watch-watchSpeed='repeat: { template: "debounceTemplate", collection: items }'></ul>
   
+  <div id='testInit' data-bind-init='init: build_dom'></div>
+
   <script id='productTemplate' type='text/html'>
     <li>
       <h3 data-bind='html: name'>Name</h3>
